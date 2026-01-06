@@ -1,3 +1,7 @@
+"""
+WVS 윤리 이슈 실험 메인 스크립트
+llm.py (api.py를 llm.py로 rename)를 사용하여 LLM 에이전트 실험 실행
+"""
 import json
 import csv
 import os
@@ -6,7 +10,11 @@ import sys
 from typing import List, Dict, Tuple
 from collections import defaultdict
 
-sys.path.insert(0, f"{os.path.dirname(os.path.realpath(__file__))}/../")
+# 현재 디렉토리를 path에 추가
+current_dir = os.path.dirname(os.path.realpath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 from agent import WVSPersonaGenerator, StatelessPersonaAgent, WVSEthicalQuestions, WVSPersonaProfile
 
 # 실험 설정
@@ -352,10 +360,10 @@ def compare_with_human_data(llm_stats: Dict, human_stats: Dict) -> Dict:
 
 if __name__ == '__main__':
     # 실험 모드 선택
-    EXPERIMENT_MODE = "separate"  # "separate" 또는 "single_turn"
+    EXPERIMENT_MODE = "single_turn"  # "separate" 또는 "single_turn"
     
     # 출력 디렉토리 설정
-    model_name = "claude_sonnet"
+    model_name = "gpt4"
     temperature = 1.0
     temp_str = str(temperature).replace('.', 'p')
     output_dir = f'wvs_results/{model_name}_temp{temp_str}'
@@ -366,12 +374,12 @@ if __name__ == '__main__':
     if EXPERIMENT_MODE == "separate":
         # 각 질문을 개별적으로 실행 (더 정확한 분석)
         for seed in RANDOM_SEEDS[:1]:  # 첫 번째 시드만 테스트
-            for country in COUNTRIES:
-                for topic in ETHICAL_TOPICS:
+            for country in COUNTRIES[:1]:  # 테스트: 첫 번째 국가만
+                for topic in ETHICAL_TOPICS[:2]:  # 테스트: 처음 2개 주제만
                     responses, stats = run_wvs_experiment(
                         country=country,
                         topic=topic,
-                        num_personas=NUM_PERSONAS_PER_COUNTRY,
+                        num_personas=10,  # 테스트: 10명만
                         random_seed=seed,
                         temp=temperature
                     )
@@ -387,13 +395,14 @@ if __name__ == '__main__':
     
     elif EXPERIMENT_MODE == "single_turn":
         # Single turn 방식 (계획서에 명시된 방법)
-        for seed in RANDOM_SEEDS[:1]:
-            for country in COUNTRIES:
+        for seed in RANDOM_SEEDS[:1]:  # 테스트: 첫 시드만
+            for country in COUNTRIES[:1]:  # 테스트: 첫 국가만
                 responses, all_stats = run_single_turn_experiment(
                     country=country,
-                    num_personas=NUM_PERSONAS_PER_COUNTRY,
+                    num_personas=10,  # 테스트: 10명만
                     random_seed=seed,
-                    temp=temperature
+                    temp=temperature,
+                    max_tokens=800
                 )
                 
                 # Single turn 결과 저장
