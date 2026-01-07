@@ -17,8 +17,17 @@ if current_dir not in sys.path:
 
 from agent import WVSPersonaGenerator, StatelessPersonaAgent, WVSEthicalQuestions, WVSPersonaProfile
 
-# 실험 설정
-COUNTRIES = ["United States", "Germany", "Great Britain", "Japan", "South Korea", "India", "Netherlands"]
+# 실험 설정 - WVS-7 국가 코드 사용
+COUNTRIES = {
+    840: "United States",
+    276: "Germany",
+    826: "Great Britain",
+    392: "Japan",
+    410: "South Korea",
+    356: "India",
+    528: "Netherlands"
+}
+
 ETHICAL_TOPICS = ["homosexuality", "abortion", "divorce", "suicide", "euthanasia", "prostitution", "death_penalty"]
 NUM_PERSONAS_PER_COUNTRY = 200  # 국가당 생성할 페르소나 수 (계획서: 1~2천명)
 RANDOM_SEEDS = [42, 123, 456, 789, 1024]  # 재현가능성을 위한 여러 시드
@@ -77,7 +86,7 @@ def calculate_distribution_stats(ratings: List[int]) -> Dict:
         평균, 표준편차, 분포 등의 통계
     """
     if not ratings:
-        return {"mean": 0, "std": 0, "count": 0, "distribution": {}}
+        return {"mean": 0, "std": 0, "count": 0, "distribution": {}, "invalid_count": 0}
     
     import statistics
     
@@ -98,7 +107,7 @@ def calculate_distribution_stats(ratings: List[int]) -> Dict:
 
 
 def run_wvs_experiment(
-    country: str,
+    country_code: int,
     topic: str,
     num_personas: int = 200,
     random_seed: int = 42,
@@ -109,7 +118,7 @@ def run_wvs_experiment(
     특정 국가와 주제에 대한 WVS 실험 실행
     
     Args:
-        country: 대상 국가
+        country_code: 대상 국가 코드 (WVS-7 3-digit code)
         topic: 윤리 이슈 주제
         num_personas: 생성할 페르소나 수
         random_seed: 랜덤 시드
@@ -119,13 +128,15 @@ def run_wvs_experiment(
     Returns:
         (개별 응답 데이터, 통계 요약) 튜플
     """
+    country_name = COUNTRIES[country_code]
+    
     print(f"\n{'='*60}")
-    print(f"Running experiment: {country} - {topic}")
+    print(f"Running experiment: {country_name} (Code: {country_code}) - {topic}")
     print(f"Random seed: {random_seed}, Temperature: {temp}")
     print(f"{'='*60}\n")
     
-    # 페르소나 생성
-    generator = WVSPersonaGenerator(country=country, seed=random_seed)
+    # 페르소나 생성 (국가 코드 사용)
+    generator = WVSPersonaGenerator(country_code=country_code, seed=random_seed)
     personas = generator.generate_multiple_personas(n=num_personas)
     
     # 질문 가져오기
@@ -149,18 +160,22 @@ def run_wvs_experiment(
             rating = parse_rating_from_response(response_text)
             
             # 개별 응답 데이터 저장
+            # 주의: 실험 질문 주제의 justifiability는 페르소나에 포함되지 않음
             persona_dict = {
                 "persona_id": i,
-                "country": country,
+                "country_code": country_code,
+                "country_name": country_name,
                 "topic": topic,
                 "age": persona.age,
-                "gender": persona.gender,
-                "education_level": persona.education_level,
-                "social_class": persona.social_class,
-                "political_left_right": persona.political_left_right,
-                "importance_religion": persona.importance_religion,
-                "religiosity": persona.religiosity,
-                "justifiability_value": getattr(persona, f"justifiability_{topic}", None),
+                "gender": persona.gender,  # 1=Male, 2=Female
+                "education_level": persona.education_level,  # 0-8 ISCED
+                "social_class": persona.social_class,  # 1-5
+                "political_left_right": persona.political_left_right,  # 1-10
+                "importance_religion": persona.importance_religion,  # 1-4
+                "religiosity": persona.religiosity,  # 1=Religious, 2=Not religious, 3=Atheist
+                # 간접 지표만 포함 (실험 질문이 아닌 것)
+                "justifiability_premarital_sex": persona.justifiability_premarital_sex,
+                "justifiability_casual_sex": persona.justifiability_casual_sex,
                 "response": response_text,
                 "rating": rating,
                 "temperature": temp,
@@ -184,7 +199,8 @@ def run_wvs_experiment(
     
     # 통계 계산
     stats = calculate_distribution_stats(ratings)
-    stats["country"] = country
+    stats["country_code"] = country_code
+    stats["country_name"] = country_name
     stats["topic"] = topic
     stats["random_seed"] = random_seed
     stats["temperature"] = temp
@@ -202,7 +218,7 @@ def save_experiment_results(
     responses_data: List[Dict],
     stats: Dict,
     output_dir: str,
-    country: str,
+    country_name: str,
     topic: str,
     seed: int
 ):
@@ -212,7 +228,9 @@ def save_experiment_results(
         os.makedirs(output_dir)
     
     # 개별 응답 데이터 저장 (CSV)
-    responses_filename = f"responses_{country}_{topic}_seed{seed}.csv"
+    # 파일명에 공백 제거
+    country_filename = country_name.replace(" ", "_")
+    responses_filename = f"responses_{country_filename}_{topic}_seed{seed}.csv"
     responses_path = os.path.join(output_dir, responses_filename)
     
     with open(responses_path, 'w', newline='', encoding='utf-8') as f:
@@ -224,7 +242,7 @@ def save_experiment_results(
     print(f"Saved responses to: {responses_path}")
     
     # 통계 요약 저장 (JSON)
-    stats_filename = f"stats_{country}_{topic}_seed{seed}.json"
+    stats_filename = f"stats_{country_filename}_{topic}_seed{seed}.json"
     stats_path = os.path.join(output_dir, stats_filename)
     
     with open(stats_path, 'w', encoding='utf-8') as f:
@@ -234,7 +252,7 @@ def save_experiment_results(
 
 
 def run_single_turn_experiment(
-    country: str,
+    country_code: int,
     num_personas: int = 200,
     random_seed: int = 42,
     temp: float = 1.0,
@@ -244,7 +262,7 @@ def run_single_turn_experiment(
     Single turn 방식으로 모든 윤리 질문에 한번에 응답
     
     Args:
-        country: 대상 국가
+        country_code: 대상 국가 코드 (WVS-7 3-digit code)
         num_personas: 생성할 페르소나 수
         random_seed: 랜덤 시드
         temp: LLM 온도
@@ -253,13 +271,15 @@ def run_single_turn_experiment(
     Returns:
         (개별 응답 데이터, 통계 요약) 튜플
     """
+    country_name = COUNTRIES[country_code]
+    
     print(f"\n{'='*60}")
-    print(f"Running SINGLE TURN experiment: {country}")
+    print(f"Running SINGLE TURN experiment: {country_name} (Code: {country_code})")
     print(f"Random seed: {random_seed}, Temperature: {temp}")
     print(f"{'='*60}\n")
     
-    # 페르소나 생성
-    generator = WVSPersonaGenerator(country=country, seed=random_seed)
+    # 페르소나 생성 (국가 코드 사용)
+    generator = WVSPersonaGenerator(country_code=country_code, seed=random_seed)
     personas = generator.generate_multiple_personas(n=num_personas)
     
     # 모든 질문을 single turn 형식으로
@@ -297,12 +317,18 @@ def run_single_turn_experiment(
             
             persona_dict = {
                 "persona_id": i,
-                "country": country,
+                "country_code": country_code,
+                "country_name": country_name,
                 "age": persona.age,
-                "gender": persona.gender,
-                "education_level": persona.education_level,
-                "social_class": persona.social_class,
-                "political_left_right": persona.political_left_right,
+                "gender": persona.gender,  # 1=Male, 2=Female
+                "education_level": persona.education_level,  # 0-8 ISCED
+                "social_class": persona.social_class,  # 1-5
+                "political_left_right": persona.political_left_right,  # 1-10
+                "importance_religion": persona.importance_religion,  # 1-4
+                "religiosity": persona.religiosity,  # 1-3
+                # 간접 지표만 포함
+                "justifiability_premarital_sex": persona.justifiability_premarital_sex,
+                "justifiability_casual_sex": persona.justifiability_casual_sex,
                 "response": response_text,
                 "temperature": temp,
                 "random_seed": random_seed,
@@ -323,6 +349,8 @@ def run_single_turn_experiment(
     for topic in ETHICAL_TOPICS:
         stats = calculate_distribution_stats(topic_ratings[topic])
         stats["topic"] = topic
+        stats["country_code"] = country_code
+        stats["country_name"] = country_name
         all_stats[topic] = stats
         
         print(f"\n{topic}: Mean={stats['mean']:.2f}, Std={stats['std']:.2f}, N={stats['count']}")
@@ -374,10 +402,11 @@ if __name__ == '__main__':
     if EXPERIMENT_MODE == "separate":
         # 각 질문을 개별적으로 실행 (더 정확한 분석)
         for seed in RANDOM_SEEDS[:1]:  # 첫 번째 시드만 테스트
-            for country in COUNTRIES[:1]:  # 테스트: 첫 번째 국가만
+            for country_code in list(COUNTRIES.keys())[:1]:  # 테스트: 첫 번째 국가만
+                country_name = COUNTRIES[country_code]
                 for topic in ETHICAL_TOPICS[:2]:  # 테스트: 처음 2개 주제만
                     responses, stats = run_wvs_experiment(
-                        country=country,
+                        country_code=country_code,
                         topic=topic,
                         num_personas=10,  # 테스트: 10명만
                         random_seed=seed,
@@ -388,7 +417,7 @@ if __name__ == '__main__':
                         responses_data=responses,
                         stats=stats,
                         output_dir=output_dir,
-                        country=country,
+                        country_name=country_name,
                         topic=topic,
                         seed=seed
                     )
@@ -396,9 +425,10 @@ if __name__ == '__main__':
     elif EXPERIMENT_MODE == "single_turn":
         # Single turn 방식 (계획서에 명시된 방법)
         for seed in RANDOM_SEEDS[:1]:  # 테스트: 첫 시드만
-            for country in COUNTRIES[:1]:  # 테스트: 첫 국가만
+            for country_code in list(COUNTRIES.keys())[:1]:  # 테스트: 첫 국가만
+                country_name = COUNTRIES[country_code]
                 responses, all_stats = run_single_turn_experiment(
-                    country=country,
+                    country_code=country_code,
                     num_personas=10,  # 테스트: 10명만
                     random_seed=seed,
                     temp=temperature,
@@ -406,7 +436,8 @@ if __name__ == '__main__':
                 )
                 
                 # Single turn 결과 저장
-                responses_filename = f"single_turn_responses_{country}_seed{seed}.csv"
+                country_filename = country_name.replace(" ", "_")
+                responses_filename = f"single_turn_responses_{country_filename}_seed{seed}.csv"
                 responses_path = os.path.join(output_dir, responses_filename)
                 
                 with open(responses_path, 'w', newline='', encoding='utf-8') as f:
@@ -415,13 +446,13 @@ if __name__ == '__main__':
                         writer.writeheader()
                         writer.writerows(responses)
                 
-                stats_filename = f"single_turn_stats_{country}_seed{seed}.json"
+                stats_filename = f"single_turn_stats_{country_filename}_seed{seed}.json"
                 stats_path = os.path.join(output_dir, stats_filename)
                 
                 with open(stats_path, 'w', encoding='utf-8') as f:
                     json.dump(all_stats, f, indent=2)
                 
-                print(f"\nCompleted {country} - saved to {output_dir}")
+                print(f"\nCompleted {country_name} (Code: {country_code}) - saved to {output_dir}")
     
     print("\n" + "="*60)
     print("ALL EXPERIMENTS COMPLETED")
