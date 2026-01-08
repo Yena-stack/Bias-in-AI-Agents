@@ -299,7 +299,7 @@ personas = generator.generate_multiple_personas(
 If you use this repository for your research, please cite:
 
 ```bibtex
-@article{yourname2024wvsbias,
+@article{YenaChoi2026WVSBias,
   title={Cultural Bias in AI Ethical Reasoning: A World Values Survey Analysis},
   author={Yena Choi},
   journal={arXiv preprint arXiv:XXXX.XXXXX},
@@ -319,7 +319,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Contact
 
-For questions or collaboration inquiries, please open an issue or contact [your email].
+For questions or collaboration inquiries, please open an issue or contact [yenachoi@hanyang.ac.kr].
 
 ## Additional Resources
 
