@@ -392,7 +392,10 @@ if __name__ == '__main__':
     EXPERIMENT_MODE = "single_turn"  # "separate" 또는 "single_turn"
     
     # 출력 디렉토리 설정
-    model_name = "gpt4"
+    model_name = "groq_llama3.3_70b"
+    model_name = "gemini-2.5-flash"
+    model_name = "gpt-4-turbo"
+
     temperature = 1.0
     temp_str = str(temperature).replace('.', 'p')
     output_dir = f'wvs_results/{model_name}_temp{temp_str}'
