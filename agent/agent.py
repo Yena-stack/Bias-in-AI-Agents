@@ -1,4 +1,6 @@
-import llm
+
+from llm.llm import chat_request, Message, create_system_message, create_user_message
+
 from dataclasses import dataclass
 from typing import Dict, Any, Optional, List
 import random
@@ -231,15 +233,8 @@ SOCIAL ATTITUDES:
 - Opinion on homosexual couples as parents: {self.homosexual_parents_opinion}/5 (1=Strongly agree they're good parents, 5=Strongly disagree)
 
 ETHICAL VALUES - Justifiability (1=Never justifiable, 10=Always justifiable):
-- Homosexuality: {self.justifiability_homosexuality}/10
-- Prostitution: {self.justifiability_prostitution}/10
-- Abortion: {self.justifiability_abortion}/10
-- Divorce: {self.justifiability_divorce}/10
 - Premarital sex: {self.justifiability_premarital_sex}/10
-- Suicide: {self.justifiability_suicide}/10
-- Euthanasia: {self.justifiability_euthanasia}/10
 - Casual sex: {self.justifiability_casual_sex}/10
-- Death penalty: {self.justifiability_death_penalty}/10
 
 POLITICAL ORIENTATION:
 - Left-Right scale: {self.political_left_right}/10 (1=Left, 10=Right)
@@ -278,25 +273,33 @@ IMPORTANT INSTRUCTIONS:
 - Keep responses concise and natural
 - Use first person ("I think...", "In my opinion...")
 """
-    
-    def respond_to_ethical_question(self, question: str, **extra_params) -> Any:
+    def respond_to_ethical_question(
+        self, 
+        question: str, 
+        max_tokens: int = 300,
+        model: Optional[str] = None
+    ) -> Any:
         """
         윤리적 질문에 대해 응답
         
         Args:
             question: 질문 텍스트
-            **extra_params: llm.chat_request에 전달할 추가 파라미터
+            max_tokens: 최대 토큰 수
+            model: 사용할 모델명 (None이면 기본값)
             
         Returns:
             LLM 응답 객체
         """
-        system_message = {"role": "system", "content": self.system_prompt}
-        user_message = {"role": "user", "content": question}
+        # Message 객체 생성
+        system_msg = create_system_message(self.system_prompt)
+        user_msg = create_user_message(question, time=1)
         
-        response = llm.chat_request(
-            messages=[system_message, user_message],
+        # API 호출
+        response = chat_request(
+            messages=[system_msg, user_msg],
             temperature=self.temp,
-            **extra_params
+            max_tokens=max_tokens,
+            model=model
         )
         
         return response
@@ -469,7 +472,7 @@ if __name__ == "__main__":
         education_level=7,  # Master degree
         social_class=2,  # Upper middle class
         political_left_right=7,  # Conservative (right-leaning)
-        justifiability_homosexuality=3  # Low acceptance
+        justifiability__casual_sex=3  # Low acceptance
     )
     
     print("=== Generated Persona ===")
@@ -478,7 +481,7 @@ if __name__ == "__main__":
     print(f"Age: {persona.age}")
     print(f"Education: {persona.education_level} (7=Master)")
     print(f"Political orientation: {persona.political_left_right}/10 (Right-leaning)")
-    print(f"Justifiability of homosexuality: {persona.justifiability_homosexuality}/10")
+    print(f"Justifiability of casual sex: {persona.justifiability__casual_sex}/10")
     
     # 에이전트 생성
     agent = StatelessPersonaAgent(persona=persona, temp=1.0)

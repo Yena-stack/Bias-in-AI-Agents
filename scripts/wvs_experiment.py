@@ -2,6 +2,7 @@
 WVS 윤리 이슈 실험 메인 스크립트
 llm.py (api.py를 llm.py로 rename)를 사용하여 LLM 에이전트 실험 실행
 """
+import sys
 import json
 import csv
 import os
@@ -10,12 +11,12 @@ import sys
 from typing import List, Dict, Tuple
 from collections import defaultdict
 
-# 현재 디렉토리를 path에 추가
-current_dir = os.path.dirname(os.path.realpath(__file__))
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
+# 프로젝트 루트를 Python 경로에 추가
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 
-from agent import WVSPersonaGenerator, StatelessPersonaAgent, WVSEthicalQuestions, WVSPersonaProfile
+from agent.agent import WVSPersonaGenerator, StatelessPersonaAgent, WVSEthicalQuestions, WVSPersonaProfile
+from llm.llm import Message, chat_request
 
 # 실험 설정 - WVS-7 국가 코드 사용
 COUNTRIES = {
