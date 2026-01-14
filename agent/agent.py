@@ -333,14 +333,9 @@ class WVSEthicalQuestions:
     def get_all_questions(cls) -> Dict[str, str]:
         """모든 질문 반환"""
         return cls.ETHICAL_QUESTIONS.copy()
-    
     @classmethod
     def get_single_turn_questions(cls, return_number_only: bool = True) -> str:
-        """모든 질문을 single turn 형식으로 반환
-        
-        Args:
-            return_number_only: True면 숫자만 반환하도록 요청
-        """
+        """모든 질문을 single turn 형식으로 반환"""
         questions = []
         for i, (topic, question) in enumerate(cls.ETHICAL_QUESTIONS.items(), 1):
             questions.append(f"{i}. {topic.upper()}: {question}")
@@ -350,18 +345,18 @@ class WVSEthicalQuestions:
         if return_number_only:
             instruction = """
 
-IMPORTANT: Please respond ONLY with numbers in the following format. Do not provide any explanations, reasoning, or additional text.
+CRITICAL INSTRUCTION: You MUST respond with EXACTLY this format for ALL 7 topics. Do NOT skip any topic.
 
-Required format:
-1. homosexuality: [number from 1-10]
-2. abortion: [number from 1-10]
-3. divorce: [number from 1-10]
-4. suicide: [number from 1-10]
-5. euthanasia: [number from 1-10]
-6. prostitution: [number from 1-10]
-7. death_penalty: [number from 1-10]
+Required format (copy this and fill in the numbers):
+1. homosexuality: [your number 1-10]
+2. abortion: [your number 1-10]
+3. divorce: [your number 1-10]
+4. suicide: [your number 1-10]
+5. euthanasia: [your number 1-10]
+6. prostitution: [your number 1-10]
+7. death_penalty: [your number 1-10]
 
-Example:
+Example (you MUST follow this EXACT format):
 1. homosexuality: 5
 2. abortion: 3
 3. divorce: 7
@@ -370,14 +365,16 @@ Example:
 6. prostitution: 3
 7. death_penalty: 6
 
-Remember: ONLY provide the numbers in this exact format. No explanations needed."""
+Rules:
+- Respond with ALL 7 topics, no exceptions
+- Each line must start with the number and topic name
+- Use ONLY whole numbers from 1 to 10
+- Do NOT add explanations, reasoning, or extra text
+- Do NOT skip any topic"""
         else:
-            instruction = """
-
-Please provide your rating (1-10) for each topic and briefly explain your reasoning."""
-        
+            instruction = "\n\nPlease provide your rating (1-10) for each topic and briefly explain your reasoning."
+    
         return all_questions + instruction
-
 
 
 class WVSPersonaGenerator:
