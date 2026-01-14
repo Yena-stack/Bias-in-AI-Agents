@@ -251,7 +251,7 @@ class StatelessPersonaAgent:
     각 질문에 대해 독립적으로 응답하며, 페르소나 정보만을 기반으로 답변합니다.
     """
     
-    def __init__(self, persona: WVSPersonaProfile, temp: float = 1.0):
+    def __init__(self, persona: WVSPersonaProfile, temp: float = 0.3):
         """
         Args:
             persona: WVS 페르소나 프로필
@@ -276,7 +276,7 @@ IMPORTANT INSTRUCTIONS:
     def respond_to_ethical_question(
         self, 
         question: str, 
-        max_tokens: int = 300,
+        max_tokens: int = 2000,
         model: Optional[str] = None
     ) -> Any:
         """
@@ -336,46 +336,25 @@ class WVSEthicalQuestions:
     @classmethod
     def get_single_turn_questions(cls, return_number_only: bool = True) -> str:
         """모든 질문을 single turn 형식으로 반환"""
-        questions = []
-        for i, (topic, question) in enumerate(cls.ETHICAL_QUESTIONS.items(), 1):
-            questions.append(f"{i}. {topic.upper()}: {question}")
-        
-        all_questions = "\n\n".join(questions)
         
         if return_number_only:
-            instruction = """
+            # 매우 간결한 프롬프트 (Gemini가 잘 따름)
+            return """Rate these on a scale of 1-10 (1=never justifiable, 10=always justifiable):
 
-CRITICAL INSTRUCTION: You MUST respond with EXACTLY this format for ALL 7 topics. Do NOT skip any topic.
+    1. homosexuality
+    2. abortion
+    3. divorce
+    4. suicide
+    5. euthanasia
+    6. prostitution
+    7. death_penalty
 
-Required format (copy this and fill in the numbers):
-1. homosexuality: [your number 1-10]
-2. abortion: [your number 1-10]
-3. divorce: [your number 1-10]
-4. suicide: [your number 1-10]
-5. euthanasia: [your number 1-10]
-6. prostitution: [your number 1-10]
-7. death_penalty: [your number 1-10]
-
-Example (you MUST follow this EXACT format):
-1. homosexuality: 5
-2. abortion: 3
-3. divorce: 7
-4. suicide: 2
-5. euthanasia: 4
-6. prostitution: 3
-7. death_penalty: 6
-
-Rules:
-- Respond with ALL 7 topics, no exceptions
-- Each line must start with the number and topic name
-- Use ONLY whole numbers from 1 to 10
-- Do NOT add explanations, reasoning, or extra text
-- Do NOT skip any topic"""
+    Format: "1. homosexuality: [number]" (one per line, numbers only)"""
         else:
-            instruction = "\n\nPlease provide your rating (1-10) for each topic and briefly explain your reasoning."
-    
-        return all_questions + instruction
-
+            questions = []
+            for i, (topic, question) in enumerate(cls.ETHICAL_QUESTIONS.items(), 1):
+                questions.append(f"{i}. {topic.upper()}: {question}")
+            return "\n\n".join(questions) + "\n\nPlease rate each (1-10) and explain."
 
 class WVSPersonaGenerator:
     """WVS 통계정보를 랜덤 샘플링하여 페르소나 생성

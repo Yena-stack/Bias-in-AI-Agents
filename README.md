@@ -64,7 +64,7 @@ pip install -r requirements.txt
 python-dotenv>=1.0.0
 requests>=2.31.0
 numpy>=1.24.0
-google-generativeai>=0.3.0  # For Gemini
+google-genai>=1.5  # For Gemini
 ```
 
 ### 2. Configure API Keys
@@ -185,7 +185,7 @@ python scripts/wvs_experiment.py \
   --country "Japan" \
   --model gemini-2.5-flash \
   --num-personas 100 \
-  --temperature 1.0 \
+  --temperature 0.3 \
   --seed 42
 ```
 
@@ -464,7 +464,7 @@ ModuleNotFoundError: No module named 'google.generativeai'
 
 **Solution:**
 ```bash
-pip install google-generativeai
+pip install google-genai
 ```
 
 ## Advanced Usage

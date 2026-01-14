@@ -7,7 +7,7 @@ import csv
 import os
 import re
 import sys
-import time  # 추가!
+import time
 from typing import List, Dict, Tuple
 from collections import defaultdict
 
@@ -44,28 +44,62 @@ COUNTRY_CODES = {
 ETHICAL_TOPICS = ["homosexuality", "abortion", "divorce", "suicide", "euthanasia", "prostitution", "death_penalty"]
 
 
-def parse_rating_from_response(response: str) -> int:
-    """LLM 응답에서 1-10 척도 평점 추출"""
-    response = response.strip()
-    if response.isdigit():
-        rating = int(response)
-        if 1 <= rating <= 10:
-            return rating
+def parse_rating_from_response_advanced(response: str, topic: str, topic_index: int) -> int:
+    """
+    개선된 평점 파싱 - 더 많은 패턴 지원
     
+    Args:
+        response: LLM 응답 전체
+        topic: 주제 이름 (예: "homosexuality")
+        topic_index: 주제 번호 (1-7)
+    
+    Returns:
+        평점 (1-10) 또는 -1 (파싱 실패)
+    """
+    # 응답을 줄 단위로 분리
+    lines = response.strip().split('\n')
+    
+    # 패턴 리스트 (우선순위 순)
     patterns = [
-        r'(?:rating|rate|score)[\s:]+(\d+)',
-        r'(\d+)\s*(?:/10|out of 10)',
-        r'(?:scale|from 1 to 10).*?(\d+)',
-        r'^(\d+)\b',
-        r'\b(\d+)\s*$',
+        # 1. "1. homosexuality: 7" 또는 "1. Homosexuality: 7"
+        rf"^\s*{topic_index}[\.\)]\s*{topic}\s*[:=\-–]\s*(\d+)",
+        
+        # 2. "homosexuality: 7" (번호 없이)
+        rf"^\s*{topic}\s*[:=\-–]\s*(\d+)",
+        
+        # 3. "1) 7" (숫자만, 번호 맞춤)
+        rf"^\s*{topic_index}[\.\)]\s*(\d+)\s*$",
+        
+        # 4. "Homosexuality - 7"
+        rf"^\s*{topic}\s*[-–]\s*(\d+)",
+        
+        # 5. "1. 7" (번호만 + 숫자)
+        rf"^\s*{topic_index}[\.\)]\s*[:=\-–]?\s*(\d+)",
+        
+        # 6. 줄 어디든 "homosexuality: 7" 형태
+        rf"{topic}\s*[:=\-–]\s*(\d+)",
+        
+        # 7. "1. ... 7" (번호 + 어떤 텍스트 + 숫자)
+        rf"^\s*{topic_index}[\.\)].+?(\d+)\s*$",
     ]
     
-    for pattern in patterns:
-        match = re.search(pattern, response, re.IGNORECASE)
-        if match:
-            rating = int(match.group(1))
-            if 1 <= rating <= 10:
-                return rating
+    # 각 줄에 대해 패턴 매칭 시도
+    for line in lines:
+        line_clean = line.strip()
+        for pattern in patterns:
+            match = re.search(pattern, line_clean, re.IGNORECASE)
+            if match:
+                rating = int(match.group(1))
+                if 1 <= rating <= 10:
+                    return rating
+    
+    # 전체 응답에서 주제 이름 근처의 숫자 찾기 (마지막 수단)
+    topic_pattern = rf"{topic}.{{0,30}}?(\d+)"
+    match = re.search(topic_pattern, response, re.IGNORECASE | re.DOTALL)
+    if match:
+        rating = int(match.group(1))
+        if 1 <= rating <= 10:
+            return rating
     
     return -1
 
@@ -97,9 +131,10 @@ def run_single_turn_experiment(
     country: str,
     num_personas: int = 100,
     random_seed: int = 42,
-    temp: float = 1.0,
-    max_tokens: int = 200,
-    model: str = None
+    temp: float = 0.3,
+    max_tokens: int = 500,
+    model: str = None,
+    debug: bool = False  # 🆕 디버그 모드
 ) -> Tuple[List[Dict], Dict]:
     """
     Single turn 방식으로 모든 윤리 질문에 한번에 응답 (숫자만)
@@ -110,7 +145,7 @@ def run_single_turn_experiment(
     print(f"Model: {model or 'default'}")
     print(f"{'='*60}\n")
     
-    # 페르소나 생성 (국가만 지정, 나머지는 랜덤 샘플링)
+    # 페르소나 생성 (국가명 → 국가 코드 변환)
     country_code = COUNTRY_CODES.get(country)
     if not country_code:
         raise ValueError(f"Unknown country: {country}")
@@ -127,6 +162,9 @@ def run_single_turn_experiment(
     
     responses_data = []
     topic_ratings = {topic: [] for topic in ETHICAL_TOPICS}
+    
+    # 🆕 파싱 실패 추적
+    parsing_failures = {topic: 0 for topic in ETHICAL_TOPICS}
     
     for i, persona in enumerate(personas):
         agent = StatelessPersonaAgent(persona=persona, temp=temp)
@@ -151,23 +189,33 @@ def run_single_turn_experiment(
             
             response_text = response.content
             
-            # Rate limit 방지를 위한 짧은 대기 (Groq 무료 플랜: 12,000 TPM)
-            time.sleep(2.0)  # 2000ms 대기
+            # 🆕 디버그 모드: 첫 5개 응답 출력
+            if debug and i < 5:
+                print(f"\n{'='*60}")
+                print(f"DEBUG: Persona {i} Response:")
+                print(f"{'='*60}")
+                print(response_text)
+                print(f"{'='*60}\n")
             
-            # 각 주제별 평점 추출
+            # Rate limit 방지를 위한 짧은 대기
+            time.sleep(0.5)
+            
+            # 각 주제별 평점 추출 (개선된 파싱)
             ratings_dict = {}
             for j, topic in enumerate(ETHICAL_TOPICS, 1):
-                pattern = rf"{j}\.\s*{topic}[\s:]+(\d+)"
-                match = re.search(pattern, response_text, re.IGNORECASE)
-                if match:
-                    rating = int(match.group(1))
-                    if 1 <= rating <= 10:
-                        ratings_dict[topic] = rating
-                        topic_ratings[topic].append(rating)
-                    else:
-                        ratings_dict[topic] = -1
+                rating = parse_rating_from_response_advanced(response_text, topic, j)
+                
+                if 1 <= rating <= 10:
+                    ratings_dict[topic] = rating
+                    topic_ratings[topic].append(rating)
                 else:
                     ratings_dict[topic] = -1
+                    parsing_failures[topic] += 1
+                    
+                    # 🆕 파싱 실패 경고 (처음 3번만)
+                    if parsing_failures[topic] <= 3 and debug:
+                        print(f"⚠️  Parsing failed for persona {i}, topic '{topic}'")
+                        print(f"   Response snippet: {response_text[:200]}...")
             
             persona_dict = {
                 "persona_id": i,
@@ -189,40 +237,46 @@ def run_single_turn_experiment(
             responses_data.append(persona_dict)
             
             if (i + 1) % 10 == 0:
-                print(f"Progress: {i+1}/{num_personas} personas completed")
-                valid_counts = sum(1 for topic in ETHICAL_TOPICS if ratings_dict.get(topic, -1) != -1)
-                print(f"  Valid ratings: {valid_counts}/7")
+                print(f"✅ Processed {i+1}/{num_personas} personas")
+                
+                # 🆕 중간 통계 출력
+                if debug:
+                    for topic in ETHICAL_TOPICS:
+                        success_rate = (len(topic_ratings[topic]) / (i+1)) * 100
+                        print(f"   {topic:15s}: {len(topic_ratings[topic]):3d} / {i+1:3d} ({success_rate:.1f}%)")
         
         except Exception as e:
             error_str = str(e)
+            print(f"❌ Error processing persona {i}: {error_str[:100]}")
             
-            # Rate limit 에러 처리
-            if "rate_limit" in error_str.lower() or "429" in error_str:
-                print(f"⏳ Rate limit hit at persona {i}. Waiting 5 seconds...")
-                time.sleep(5)
+            # Retry 로직 (기존 코드 유지)
+            if "safety" in error_str.lower() or "block" in error_str.lower():
+                print(f"⚠️  Safety filter triggered for persona {i}, retrying with adjusted prompt...")
+                time.sleep(1)
                 
-                # 재시도
                 try:
+                    messages = [
+                        Message(time=0, content=system_message_content, role="system"),
+                        Message(time=1, content=all_questions, role="user")
+                    ]
+                    
                     response = chat_request(
                         messages=messages,
                         temperature=temp,
                         max_tokens=max_tokens,
                         model=model
                     )
-                    response_text = response.content
                     
-                    # 성공했으면 정상 처리 계속
+                    response_text = response.content
+                    time.sleep(0.5)
+                    
                     ratings_dict = {}
                     for j, topic in enumerate(ETHICAL_TOPICS, 1):
-                        pattern = rf"{j}\.\s*{topic}[\s:]+(\d+)"
-                        match = re.search(pattern, response_text, re.IGNORECASE)
-                        if match:
-                            rating = int(match.group(1))
-                            if 1 <= rating <= 10:
-                                ratings_dict[topic] = rating
-                                topic_ratings[topic].append(rating)
-                            else:
-                                ratings_dict[topic] = -1
+                        rating = parse_rating_from_response_advanced(response_text, topic, j)
+                        
+                        if 1 <= rating <= 10:
+                            ratings_dict[topic] = rating
+                            topic_ratings[topic].append(rating)
                         else:
                             ratings_dict[topic] = -1
                     
@@ -278,7 +332,10 @@ def run_single_turn_experiment(
         stats = calculate_distribution_stats(topic_ratings[topic])
         stats["topic"] = topic
         all_stats[topic] = stats
-        print(f"{topic:15s}: Mean={stats['mean']:.2f}, Std={stats['std']:.2f}, N={stats['count']}/{num_personas}")
+        
+        # 🆕 파싱 성공률 표시
+        success_rate = (stats['count'] / num_personas) * 100
+        print(f"{topic:15s}: Mean={stats['mean']:.2f}, Std={stats['std']:.2f}, N={stats['count']}/{num_personas} ({success_rate:.1f}%)")
     
     return responses_data, all_stats
 
@@ -295,10 +352,12 @@ if __name__ == '__main__':
                        help='사용할 모델 (기본값: llama-3.3-70b-versatile)')
     parser.add_argument('--num-personas', type=int, default=100,
                        help='생성할 페르소나 수 (기본값: 100)')
-    parser.add_argument('--temperature', type=float, default=1.0,
+    parser.add_argument('--temperature', type=float, default=0.3,
                        help='LLM 온도 (기본값: 1.0)')
     parser.add_argument('--seed', type=int, default=42,
                        help='랜덤 시드 (기본값: 42)')
+    parser.add_argument('--debug', action='store_true',
+                       help='디버그 모드 활성화 (상세 로그 출력)')
     
     args = parser.parse_args()
     
@@ -313,7 +372,7 @@ if __name__ == '__main__':
         countries_to_run = [args.country]
     else:
         print("❌ Error: Please specify --country or --all-countries")
-        print(f"Example: python scripts/wvs_experiment.py --country \"South Korea\" --model gemini-2.5-flash")
+        print(f"Example: python scripts/wvs_experiment.py --country \"South Korea\" --model gemini-1.5-flash")
         print(f"Or: python scripts/wvs_experiment.py --all-countries --model llama-3.3-70b-versatile")
         sys.exit(1)
     
@@ -363,6 +422,8 @@ if __name__ == '__main__':
     print(f"🌡️  Temperature: {args.temperature}")
     print(f"🎲 Random Seed: {args.seed}")
     print(f"📁 Output: {output_dir}")
+    if args.debug:
+        print(f"🐛 Debug mode: ENABLED")
     print(f"{'='*70}\n")
     
     # 각 국가별로 실험 실행
@@ -377,8 +438,9 @@ if __name__ == '__main__':
                 num_personas=args.num_personas,
                 random_seed=args.seed,
                 temp=args.temperature,
-                max_tokens=200,
-                model=args.model
+                max_tokens=500,
+                model=args.model,
+                debug=args.debug  # 🆕
             )
             
             # 결과 저장

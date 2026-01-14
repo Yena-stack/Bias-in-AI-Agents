@@ -101,37 +101,62 @@ class Message:
 def chat_request(
     messages: List[Message], 
     max_tokens: int = 0, 
-    temperature: float = 1.0,
+    temperature: float = 0.3,
     model: Optional[str] = None
 ) -> Message:
     """
     Chat Completion API 요청
-    
-    Args:
-        messages: 메시지 리스트
-        max_tokens: 최대 토큰 수 (0은 무제한)
-        temperature: 샘플링 온도 (0.0-2.0)
-        model: 사용할 모델명
-              - OpenAI: "gpt-4-1106-preview", "gpt-3.5-turbo"
-              - Gemini: "gemini-1.5-pro", "gemini-1.5-flash"
-              - Groq: "llama-3.3-70b-versatile", "llama-3.1-8b-instant"
-              - Together: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo"
-              - Ollama: "llama3.2", "llama3.1:70b"
-        
-    Returns:
-        생성된 응답 메시지
+    모델명을 기반으로 자동으로 적절한 API를 선택합니다.
     """
     assert 0 <= temperature <= 2, "temperature must be between 0 and 2"
     assert len(messages) > 0, "messages must not be empty"
     
-    # 기본 모델 설정
+    # 1. 모델명이 주어진 경우, 모델명으로 API 타입 결정
+    if model:
+        model_lower = model.lower()
+        
+        # Gemini 모델 감지
+        if 'gemini' in model_lower:
+            if not GEMINI_API_KEY:
+                raise ValueError(f"GEMINI_API_KEY required for model '{model}' but not found in environment")
+            return _chat_request_gemini(messages, max_tokens, temperature, model)
+        
+        # GPT 모델 감지
+        elif 'gpt' in model_lower:
+            if not OPENAI_API_KEY:
+                raise ValueError(f"OPENAI_API_KEY required for model '{model}' but not found in environment")
+            # OpenAI 호환 엔드포인트 사용
+            return _chat_request_openai_compatible(messages, max_tokens, temperature, model)
+        
+        # Llama 모델 감지 (Groq, Together, Ollama)
+        elif 'llama' in model_lower:
+            # Groq가 우선 (가장 빠름)
+            if GROQ_API_KEY and ('versatile' in model_lower or 'instant' in model_lower):
+                return _chat_request_openai_compatible(messages, max_tokens, temperature, model)
+            # Together AI
+            elif TOGETHER_API_KEY and 'meta-llama' in model_lower:
+                return _chat_request_openai_compatible(messages, max_tokens, temperature, model)
+            # Ollama (로컬)
+            elif 'llama3' in model_lower or 'llama2' in model_lower:
+                return _chat_request_ollama(messages, max_tokens, temperature, model)
+            # 기본: Groq 시도
+            elif GROQ_API_KEY:
+                return _chat_request_openai_compatible(messages, max_tokens, temperature, model)
+            else:
+                raise ValueError(f"No API key available for Llama model '{model}'")
+        
+        # 알 수 없는 모델 - 환경 변수 기반으로 폴백
+        else:
+            print(f"Warning: Unknown model '{model}', using default API based on environment")
+    
+    # 2. 모델명이 없는 경우, 환경 변수 기반 기본값 사용
     if model is None:
         if API_TYPE == 'groq':
-            model = "llama-3.3-70b-versatile"  # 매우 빠른 추론
+            model = "llama-3.3-70b-versatile"
         elif API_TYPE == 'together':
             model = "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo"
         elif API_TYPE == 'ollama':
-            model = "llama3.2"  # 로컬 모델
+            model = "llama3.2"
         elif API_TYPE == 'gemini':
             model = "gemini-1.5-flash"
         elif API_TYPE == 'openai':
@@ -139,6 +164,7 @@ def chat_request(
         else:
             model = "default"
     
+    # 3. 환경 변수 기반 API 선택
     if API_TYPE == 'gemini':
         return _chat_request_gemini(messages, max_tokens, temperature, model)
     elif API_TYPE == 'ollama':
@@ -148,7 +174,6 @@ def chat_request(
     else:
         return _chat_request_local(messages, max_tokens, temperature)
 
-
 def _chat_request_gemini(
     messages: List[Message],
     max_tokens: int,
@@ -156,7 +181,7 @@ def _chat_request_gemini(
     model: str
 ) -> Message:
     """Gemini API 요청"""
-    import google.generativeai as genai
+    import google.genai as genai
     
     genai.configure(api_key=GEMINI_API_KEY)
     
@@ -178,9 +203,30 @@ def _chat_request_gemini(
     if max_tokens > 0:
         generation_config["max_output_tokens"] = max_tokens
     
+    # 🔥 안전 설정 추가 (모든 필터 비활성화)
+    safety_settings = [
+        {
+            "category": "HARM_CATEGORY_HARASSMENT",
+            "threshold": "BLOCK_NONE"
+        },
+        {
+            "category": "HARM_CATEGORY_HATE_SPEECH",
+            "threshold": "BLOCK_NONE"
+        },
+        {
+            "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            "threshold": "BLOCK_NONE"
+        },
+        {
+            "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+            "threshold": "BLOCK_NONE"
+        }
+    ]
+    
     model_instance = genai.GenerativeModel(
         model_name=model,
         generation_config=generation_config,
+        safety_settings=safety_settings,  # 🔥 추가
         system_instruction=system_instruction
     )
     
@@ -198,7 +244,6 @@ def _chat_request_gemini(
     
     time = int(np.max([message.time for message in messages]) + 1)
     return Message(time=time, content=response.text, role='assistant')
-
 
 def _chat_request_openai_compatible(
     messages: List[Message],
@@ -325,7 +370,7 @@ def _chat_request_local(
 def complete_request(
     messages: List[Message], 
     max_tokens: int = 0, 
-    temperature: float = 1.0,
+    temperature: float = 0.3,
     logprobs: int = 5
 ) -> tuple:
     """
@@ -398,7 +443,7 @@ if __name__ == "__main__":
     try:
         response = chat_request(
             messages=[system_msg, user_msg],
-            temperature=0.7,
+            temperature=0.3,
             max_tokens=100
         )
         print(f"Response: {response.content}")

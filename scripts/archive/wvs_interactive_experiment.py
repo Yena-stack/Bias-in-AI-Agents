@@ -81,7 +81,7 @@ class ValueSurveySimulator:
                         "How do these factors shape your view on sensitive moral issues?",
                 role="user"
             )
-            thought_process = sim_agent.perceive(message=thought_prompt, max_tokens=500).content
+            thought_process = sim_agent.perceive(message=thought_prompt, max_tokens=2000).content
 
             # 2단계: 실제 점수 매기기
             survey_prompt = Message(
@@ -93,7 +93,7 @@ class ValueSurveySimulator:
                 ),
                 role="user"
             )
-            response = sim_agent.perceive(message=survey_prompt, max_tokens=500).content
+            response = sim_agent.perceive(message=survey_prompt, max_tokens=2000).content
             
             # 데이터 정리
             scores = self.parse_scores(response)
