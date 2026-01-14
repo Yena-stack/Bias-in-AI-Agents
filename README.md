@@ -64,7 +64,7 @@ pip install -r requirements.txt
 python-dotenv>=1.0.0
 requests>=2.31.0
 numpy>=1.24.0
-google-genai>=1.5  # For Gemini
+google-generativeai>=1.3  # For Gemini
 ```
 
 ### 2. Configure API Keys
@@ -464,7 +464,7 @@ ModuleNotFoundError: No module named 'google.generativeai'
 
 **Solution:**
 ```bash
-pip install google-genai
+pip install google-generativeai
 ```
 
 ## Advanced Usage

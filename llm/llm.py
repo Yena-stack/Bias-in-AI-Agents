@@ -181,7 +181,7 @@ def _chat_request_gemini(
     model: str
 ) -> Message:
     """Gemini API 요청"""
-    import google.genai as genai
+    import google.generativeai as genai
     
     genai.configure(api_key=GEMINI_API_KEY)
     
