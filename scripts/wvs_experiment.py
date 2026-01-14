@@ -7,6 +7,7 @@ import csv
 import os
 import re
 import sys
+import time  # 추가!
 from typing import List, Dict, Tuple
 from collections import defaultdict
 
@@ -28,6 +29,18 @@ from llm.llm import Message, chat_request
 
 # 실험 설정
 COUNTRIES = ["United States", "Germany", "Great Britain", "Japan", "South Korea", "India", "Netherlands"]
+
+# 국가명 → WVS 국가 코드 매핑
+COUNTRY_CODES = {
+    "United States": 840,
+    "Germany": 276,
+    "Great Britain": 826,
+    "Japan": 392,
+    "South Korea": 410,
+    "India": 356,
+    "Netherlands": 528
+}
+
 ETHICAL_TOPICS = ["homosexuality", "abortion", "divorce", "suicide", "euthanasia", "prostitution", "death_penalty"]
 
 
@@ -98,10 +111,14 @@ def run_single_turn_experiment(
     print(f"{'='*60}\n")
     
     # 페르소나 생성 (국가만 지정, 나머지는 랜덤 샘플링)
-    generator = WVSPersonaGenerator(country=country, seed=random_seed)
+    country_code = COUNTRY_CODES.get(country)
+    if not country_code:
+        raise ValueError(f"Unknown country: {country}")
+    
+    generator = WVSPersonaGenerator(country_code=country_code, seed=random_seed)
     personas = generator.generate_multiple_personas(n=num_personas)
     
-    print(f"✅ Generated {len(personas)} personas for {country}")
+    print(f"✅ Generated {len(personas)} personas for {country} (Code: {country_code})")
     print(f"   Example persona: Age={personas[0].age}, Gender={personas[0].gender}, Education={personas[0].education_level}")
     print(f"   Random seed: {random_seed} (for reproducibility)\n")
     
@@ -133,6 +150,9 @@ def run_single_turn_experiment(
             )
             
             response_text = response.content
+            
+            # Rate limit 방지를 위한 짧은 대기 (Groq 무료 플랜: 12,000 TPM)
+            time.sleep(2.0)  # 2000ms 대기
             
             # 각 주제별 평점 추출
             ratings_dict = {}
@@ -174,17 +194,80 @@ def run_single_turn_experiment(
                 print(f"  Valid ratings: {valid_counts}/7")
         
         except Exception as e:
-            print(f"❌ Error processing persona {i}: {str(e)}")
-            persona_dict = {
-                "persona_id": i,
-                "country": country,
-                "age": persona.age if hasattr(persona, 'age') else -1,
-                "gender": persona.gender if hasattr(persona, 'gender') else "unknown",
-                "error": str(e),
-                **{f"rating_{topic}": -1 for topic in ETHICAL_TOPICS}
-            }
-            responses_data.append(persona_dict)
-            continue
+            error_str = str(e)
+            
+            # Rate limit 에러 처리
+            if "rate_limit" in error_str.lower() or "429" in error_str:
+                print(f"⏳ Rate limit hit at persona {i}. Waiting 5 seconds...")
+                time.sleep(5)
+                
+                # 재시도
+                try:
+                    response = chat_request(
+                        messages=messages,
+                        temperature=temp,
+                        max_tokens=max_tokens,
+                        model=model
+                    )
+                    response_text = response.content
+                    
+                    # 성공했으면 정상 처리 계속
+                    ratings_dict = {}
+                    for j, topic in enumerate(ETHICAL_TOPICS, 1):
+                        pattern = rf"{j}\.\s*{topic}[\s:]+(\d+)"
+                        match = re.search(pattern, response_text, re.IGNORECASE)
+                        if match:
+                            rating = int(match.group(1))
+                            if 1 <= rating <= 10:
+                                ratings_dict[topic] = rating
+                                topic_ratings[topic].append(rating)
+                            else:
+                                ratings_dict[topic] = -1
+                        else:
+                            ratings_dict[topic] = -1
+                    
+                    persona_dict = {
+                        "persona_id": i,
+                        "country": country,
+                        "age": persona.age,
+                        "gender": persona.gender,
+                        "education_level": persona.education_level,
+                        "social_class": persona.social_class,
+                        "political_left_right": persona.political_left_right,
+                        "importance_religion": persona.importance_religion,
+                        "religiosity": persona.religiosity,
+                        "response": response_text,
+                        "temperature": temp,
+                        "random_seed": random_seed,
+                        "model": model or "default",
+                        **{f"rating_{topic}": ratings_dict.get(topic, -1) for topic in ETHICAL_TOPICS}
+                    }
+                    responses_data.append(persona_dict)
+                    
+                except Exception as retry_error:
+                    print(f"❌ Retry failed for persona {i}: {str(retry_error)}")
+                    persona_dict = {
+                        "persona_id": i,
+                        "country": country,
+                        "age": persona.age if hasattr(persona, 'age') else -1,
+                        "gender": persona.gender if hasattr(persona, 'gender') else "unknown",
+                        "error": str(retry_error),
+                        **{f"rating_{topic}": -1 for topic in ETHICAL_TOPICS}
+                    }
+                    responses_data.append(persona_dict)
+                    continue
+            else:
+                print(f"❌ Error processing persona {i}: {error_str}")
+                persona_dict = {
+                    "persona_id": i,
+                    "country": country,
+                    "age": persona.age if hasattr(persona, 'age') else -1,
+                    "gender": persona.gender if hasattr(persona, 'gender') else "unknown",
+                    "error": error_str,
+                    **{f"rating_{topic}": -1 for topic in ETHICAL_TOPICS}
+                }
+                responses_data.append(persona_dict)
+                continue
     
     # 각 주제별 통계 계산
     all_stats = {}
