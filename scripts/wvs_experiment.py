@@ -204,7 +204,7 @@ def run_single_turn_experiment(
             response = chat_request(
                 messages=messages,
                 temperature=temp,
-                max_tokens=4000
+                max_tokens=4000,
                 model=model
             )
             
