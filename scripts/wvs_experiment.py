@@ -153,7 +153,7 @@ def run_single_turn_experiment(
     num_personas: int = 100,
     random_seed: int = 42,
     temp: float = 0.3,
-    max_tokens: int = 4000,
+    max_tokens: int = 500,
     model: str = None,
     debug: bool = False  # 🆕 디버그 모드
 ) -> Tuple[List[Dict], Dict]:
@@ -204,13 +204,13 @@ def run_single_turn_experiment(
             response = chat_request(
                 messages=messages,
                 temperature=temp,
-                max_tokens=4000,
+                max_tokens=1000,  # 🆕 500 → 1000으로 증가
                 model=model
             )
             
             response_text = response.content
             
-            # 🆕 디버그 모드: 첫 5개 응답 출력
+            # 🔥 디버그 모드: 첫 5개 응답 출력
             if debug and i < 5:
                 print(f"\n{'='*60}")
                 print(f"DEBUG: Persona {i} Response (FULL):")
@@ -220,8 +220,9 @@ def run_single_turn_experiment(
                 print(f"Response length: {len(response_text)} characters")
                 print(f"{'='*60}\n")
             
-            # Rate limit 방지를 위한 짧은 대기
-            time.sleep(0.5)
+            # 🔥 Rate limit 방지를 위한 대기 (RPM 1000, TPM 300K 고려)
+            # RPM 1000 제한이 더 타이트함 → 안전하게 1초 간격 사용
+            time.sleep(1.0)
             
             # 각 주제별 평점 추출 (개선된 파싱)
             ratings_dict = {}
@@ -461,7 +462,7 @@ if __name__ == '__main__':
                 num_personas=args.num_personas,
                 random_seed=args.seed,
                 temp=args.temperature,
-                max_tokens=4000,
+                max_tokens=500,
                 model=args.model,
                 debug=args.debug  # 🆕
             )

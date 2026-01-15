@@ -1,0 +1,15 @@
+persona_id,country,age,gender,education_level,social_class,political_left_right,importance_religion,religiosity,response,temperature,random_seed,model,rating_homosexuality,rating_abortion,rating_divorce,rating_suicide,rating_euthanasia,rating_prostitution,rating_death_penalty
+0,India,53,1,1,2,4,4,1,"1. **homosexuality**: 6
+2. **abortion**: 4
+3. **divorce**: 7
+4. **suicide**: 2
+5. **euthanasia**: 3
+6. **prostitution**: 5
+7. **death_penalty**: 8",0.3,42,llama-3.3-70b-versatile,6,4,7,2,3,5,8
+1,India,66,1,4,3,6,3,1,"1. homosexuality: 8
+2. abortion: 5
+3. divorce: 7
+4. suicide: 2
+5. euthanasia: 4
+6. prostitution: 3
+7. death_penalty: 6",0.3,42,llama-3.3-70b-versatile,8,5,7,2,4,3,6
