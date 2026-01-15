@@ -293,45 +293,108 @@ def _chat_request_openai_compatible(
     if max_tokens > 0:
         request_body["max_tokens"] = max_tokens
     
-    # 🔥 Rate limit 처리를 위한 retry 로직
-    max_retries = 10  # 3 → 10으로 증가
+    # 🔥 매우 강력한 Rate limit 처리 (오래 걸려도 안전하게)
+    max_retries = 30  # 10 → 30으로 대폭 증가
+    base_wait_time = 10.0  # 기본 10초 대기
+    
     for attempt in range(max_retries):
-        response = requests.post(
-            f'{API_URL}/chat/completions',
-            headers=headers,
-            json=request_body
-        )
-        
-        # Rate limit (429) 에러 처리
-        if response.status_code == 429:
+        try:
+            response = requests.post(
+                f'{API_URL}/chat/completions',
+                headers=headers,
+                json=request_body,
+                timeout=60  # 60초 타임아웃 추가
+            )
+            
+            # Rate limit (429) 에러 처리
+            if response.status_code == 429:
+                if attempt < max_retries - 1:
+                    # 🔥 헤더에서 retry-after 우선 확인
+                    retry_after_header = response.headers.get('retry-after')
+                    if retry_after_header:
+                        try:
+                            wait_time = float(retry_after_header) + 2.0  # 헤더 시간 + 2초 여유
+                            print(f"📊 retry-after header: {retry_after_header}s, will wait {wait_time:.1f}s")
+                        except ValueError:
+                            wait_time = base_wait_time
+                    else:
+                        # 헤더에 없으면 에러 메시지에서 추출
+                        try:
+                            error_data = response.json()
+                            wait_time = base_wait_time  # 기본값
+                            
+                            # 🔥 디버그: 에러 메시지 전체 출력
+                            error_msg = error_data.get('error', {}).get('message', 'No message')
+                            print(f"🔍 Rate limit error: {error_msg[:300]}")
+                            
+                            if 'error' in error_data and 'message' in error_data['error']:
+                                import re
+                                message = error_data['error']['message']
+                                
+                                # 여러 패턴 시도
+                                patterns = [
+                                    r'try again in ([\d.]+)s',           # "try again in 2.1s"
+                                    r'try again in ([\d.]+) seconds',   # "try again in 2.1 seconds"
+                                    r'Please wait ([\d.]+)s',           # "Please wait 2.1s"
+                                    r'wait ([\d.]+) seconds',           # "wait 2.1 seconds"
+                                ]
+                                
+                                for pattern in patterns:
+                                    match = re.search(pattern, message, re.IGNORECASE)
+                                    if match:
+                                        suggested_wait = float(match.group(1))
+                                        # 제안된 시간 + 2초 여유 (2배는 너무 김)
+                                        wait_time = suggested_wait + 2.0
+                                        print(f"📊 API suggests {suggested_wait:.1f}s, will wait {wait_time:.1f}s")
+                                        break
+                                else:
+                                    # 패턴 매칭 실패 시
+                                    wait_time = base_wait_time
+                                    print(f"⚠️  Could not parse wait time from message, using base: {wait_time:.1f}s")
+                        except Exception as parse_error:
+                            # JSON 파싱 실패 시
+                            wait_time = base_wait_time
+                            print(f"⚠️  Error parsing response ({parse_error}), using base: {wait_time:.1f}s")
+                    
+                    # 최소 2초, 최대 120초
+                    wait_time = max(2.0, min(wait_time, 120.0))
+                    
+                    print(f"⏳ Rate limit hit. Waiting {wait_time:.1f}s... (attempt {attempt+1}/{max_retries})")
+                    import time
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    print(f"❌ Rate limit exceeded after {max_retries} retries")
+                    raise Exception(f"API rate limit exceeded after {max_retries} attempts")
+            
+            # 다른 에러 처리
+            if response.status_code != 200:
+                print(f"Error in API call: {response.text}")
+                raise Exception(f"API call failed with status {response.status_code}")
+            
+            # 성공
+            break
+            
+        except requests.exceptions.Timeout:
             if attempt < max_retries - 1:
-                # 에러 메시지에서 대기 시간 추출
-                error_data = response.json()
-                wait_time = 5.0  # 기본 대기 시간 3.0 → 5.0
-                
-                if 'error' in error_data and 'message' in error_data['error']:
-                    import re
-                    message = error_data['error']['message']
-                    # "Please try again in 2.1s" 형태에서 시간 추출
-                    match = re.search(r'try again in ([\d.]+)s', message)
-                    if match:
-                        wait_time = float(match.group(1)) + 1.0  # 여유를 두고 1.0초 추가 (0.5 → 1.0)
-                
-                print(f"⚠️  Rate limit hit. Waiting {wait_time:.1f}s... (attempt {attempt+1}/{max_retries})")
+                wait_time = base_wait_time * (1.5 ** attempt)
+                wait_time = max(10.0, min(wait_time, 120.0))
+                print(f"⚠️  Request timeout. Waiting {wait_time:.1f}s... (attempt {attempt+1}/{max_retries})")
                 import time
                 time.sleep(wait_time)
                 continue
             else:
-                print(f"❌ Rate limit exceeded after {max_retries} retries")
-                raise Exception(f"API rate limit exceeded after {max_retries} attempts")
-        
-        # 다른 에러 처리
-        if response.status_code != 200:
-            print(f"Error in API call: {response.text}")
-            raise Exception(f"API call failed with status {response.status_code}")
-        
-        # 성공
-        break
+                raise
+        except requests.exceptions.RequestException as e:
+            if attempt < max_retries - 1:
+                wait_time = base_wait_time * (1.5 ** attempt)
+                wait_time = max(10.0, min(wait_time, 120.0))
+                print(f"⚠️  Request error: {str(e)}. Waiting {wait_time:.1f}s... (attempt {attempt+1}/{max_retries})")
+                import time
+                time.sleep(wait_time)
+                continue
+            else:
+                raise
     
     response_data = response.json()
 

@@ -220,9 +220,9 @@ def run_single_turn_experiment(
                 print(f"Response length: {len(response_text)} characters")
                 print(f"{'='*60}\n")
             
-            # 🔥 Rate limit 방지를 위한 대기 (RPM 1000, TPM 300K 고려)
-            # RPM 1000 제한이 더 타이트함 → 안전하게 1초 간격 사용
-            time.sleep(1.0)
+            # 🔥 Rate limit 방지를 위한 대기 (보수적 설정)
+            # 안전하게 5초 간격 사용 (RPM: 60/min = 12/min, RPM 제한 1000의 1.2%만 사용)
+            time.sleep(5.0)
             
             # 각 주제별 평점 추출 (개선된 파싱)
             ratings_dict = {}
@@ -273,75 +273,63 @@ def run_single_turn_experiment(
             error_str = str(e)
             print(f"❌ Error processing persona {i}: {error_str[:100]}")
             
-            # Retry 로직 (기존 코드 유지)
-            if "safety" in error_str.lower() or "block" in error_str.lower():
-                print(f"⚠️  Safety filter triggered for persona {i}, retrying with adjusted prompt...")
-                time.sleep(1)
+            # 🔥 강력한 Retry 로직 - 어떤 에러든 재시도
+            print(f"⚠️  Will retry persona {i} after waiting...")
+            time.sleep(10)  # 10초 대기
+            
+            try:
+                messages = [
+                    Message(time=0, content=system_message_content, role="system"),
+                    Message(time=1, content=all_questions, role="user")
+                ]
                 
-                try:
-                    messages = [
-                        Message(time=0, content=system_message_content, role="system"),
-                        Message(time=1, content=all_questions, role="user")
-                    ]
+                response = chat_request(
+                    messages=messages,
+                    temperature=temp,
+                    max_tokens=max_tokens,
+                    model=model
+                )
+                
+                response_text = response.content
+                time.sleep(5.0)  # retry 후에도 충분한 대기
+                
+                ratings_dict = {}
+                for j, topic in enumerate(ETHICAL_TOPICS, 1):
+                    rating = parse_rating_from_response_advanced(response_text, topic, j, debug=debug)
                     
-                    response = chat_request(
-                        messages=messages,
-                        temperature=temp,
-                        max_tokens=max_tokens,
-                        model=model
-                    )
-                    
-                    response_text = response.content
-                    time.sleep(0.5)
-                    
-                    ratings_dict = {}
-                    for j, topic in enumerate(ETHICAL_TOPICS, 1):
-                        rating = parse_rating_from_response_advanced(response_text, topic, j, debug=debug)
-                        
-                        if 1 <= rating <= 10:
-                            ratings_dict[topic] = rating
-                            topic_ratings[topic].append(rating)
-                        else:
-                            ratings_dict[topic] = -1
-                    
-                    persona_dict = {
-                        "persona_id": i,
-                        "country": country,
-                        "age": persona.age,
-                        "gender": persona.gender,
-                        "education_level": persona.education_level,
-                        "social_class": persona.social_class,
-                        "political_left_right": persona.political_left_right,
-                        "importance_religion": persona.importance_religion,
-                        "religiosity": persona.religiosity,
-                        "response": response_text,
-                        "temperature": temp,
-                        "random_seed": random_seed,
-                        "model": model or "default",
-                        **{f"rating_{topic}": ratings_dict.get(topic, -1) for topic in ETHICAL_TOPICS}
-                    }
-                    responses_data.append(persona_dict)
-                    
-                except Exception as retry_error:
-                    print(f"❌ Retry failed for persona {i}: {str(retry_error)}")
-                    persona_dict = {
-                        "persona_id": i,
-                        "country": country,
-                        "age": persona.age if hasattr(persona, 'age') else -1,
-                        "gender": persona.gender if hasattr(persona, 'gender') else "unknown",
-                        "error": str(retry_error),
-                        **{f"rating_{topic}": -1 for topic in ETHICAL_TOPICS}
-                    }
-                    responses_data.append(persona_dict)
-                    continue
-            else:
-                print(f"❌ Error processing persona {i}: {error_str}")
+                    if 1 <= rating <= 10:
+                        ratings_dict[topic] = rating
+                        topic_ratings[topic].append(rating)
+                    else:
+                        ratings_dict[topic] = -1
+                
+                persona_dict = {
+                    "persona_id": i,
+                    "country": country,
+                    "age": persona.age,
+                    "gender": persona.gender,
+                    "education_level": persona.education_level,
+                    "social_class": persona.social_class,
+                    "political_left_right": persona.political_left_right,
+                    "importance_religion": persona.importance_religion,
+                    "religiosity": persona.religiosity,
+                    "response": response_text,
+                    "temperature": temp,
+                    "random_seed": random_seed,
+                    "model": model or "default",
+                    **{f"rating_{topic}": ratings_dict.get(topic, -1) for topic in ETHICAL_TOPICS}
+                }
+                responses_data.append(persona_dict)
+                print(f"✅ Retry succeeded for persona {i}")
+                
+            except Exception as retry_error:
+                print(f"❌ Retry failed for persona {i}: {str(retry_error)[:100]}")
                 persona_dict = {
                     "persona_id": i,
                     "country": country,
                     "age": persona.age if hasattr(persona, 'age') else -1,
                     "gender": persona.gender if hasattr(persona, 'gender') else "unknown",
-                    "error": error_str,
+                    "error": str(retry_error)[:200],
                     **{f"rating_{topic}": -1 for topic in ETHICAL_TOPICS}
                 }
                 responses_data.append(persona_dict)
