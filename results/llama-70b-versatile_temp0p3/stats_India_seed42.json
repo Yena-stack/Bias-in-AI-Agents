@@ -1,36 +1,37 @@
 {
   "homosexuality": {
-    "mean": 5.8,
-    "std": 2.8635642126552705,
+    "mean": 6.2,
+    "std": 3.3466401061363023,
     "count": 5,
     "distribution": {
       "6": 2,
-      "8": 2,
+      "8": 1,
+      "10": 1,
       "1": 1
     },
     "invalid_count": 0,
     "topic": "homosexuality"
   },
   "abortion": {
-    "mean": 4,
-    "std": 1.5811388300841898,
+    "mean": 4.8,
+    "std": 2.16794833886788,
     "count": 5,
     "distribution": {
       "4": 1,
-      "5": 1,
-      "6": 1,
-      "2": 1,
-      "3": 1
+      "5": 2,
+      "8": 1,
+      "2": 1
     },
     "invalid_count": 0,
     "topic": "abortion"
   },
   "divorce": {
-    "mean": 6.6,
-    "std": 1.51657508881031,
+    "mean": 7,
+    "std": 1.8708286933869707,
     "count": 5,
     "distribution": {
-      "7": 3,
+      "7": 2,
+      "9": 1,
       "4": 1,
       "8": 1
     },
@@ -38,51 +39,52 @@
     "topic": "divorce"
   },
   "suicide": {
-    "mean": 1.4,
+    "mean": 1.6,
     "std": 0.5477225575051661,
     "count": 5,
     "distribution": {
-      "1": 3,
-      "2": 2
+      "2": 3,
+      "1": 2
     },
     "invalid_count": 0,
     "topic": "suicide"
   },
   "euthanasia": {
-    "mean": 3.2,
-    "std": 1.3038404810405297,
+    "mean": 4,
+    "std": 1.8708286933869707,
     "count": 5,
     "distribution": {
       "3": 1,
-      "4": 1,
-      "5": 1,
-      "2": 2
+      "4": 2,
+      "7": 1,
+      "2": 1
     },
     "invalid_count": 0,
     "topic": "euthanasia"
   },
   "prostitution": {
-    "mean": 2.8,
-    "std": 1.9235384061671346,
+    "mean": 3.4,
+    "std": 2.073644135332772,
     "count": 5,
     "distribution": {
-      "2": 2,
+      "5": 1,
       "3": 1,
       "6": 1,
-      "1": 1
+      "1": 1,
+      "2": 1
     },
     "invalid_count": 0,
     "topic": "prostitution"
   },
   "death_penalty": {
-    "mean": 5.4,
-    "std": 1.816590212458495,
+    "mean": 5.2,
+    "std": 3.1144823004794873,
     "count": 5,
     "distribution": {
-      "5": 2,
+      "8": 2,
       "6": 1,
-      "3": 1,
-      "8": 1
+      "1": 1,
+      "3": 1
     },
     "invalid_count": 0,
     "topic": "death_penalty"

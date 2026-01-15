@@ -293,16 +293,46 @@ def _chat_request_openai_compatible(
     if max_tokens > 0:
         request_body["max_tokens"] = max_tokens
     
-    response = requests.post(
-        f'{API_URL}/chat/completions',
-        headers=headers,
-        json=request_body
-    )
+    # 🔥 Rate limit 처리를 위한 retry 로직
+    max_retries = 10  # 3 → 10으로 증가
+    for attempt in range(max_retries):
+        response = requests.post(
+            f'{API_URL}/chat/completions',
+            headers=headers,
+            json=request_body
+        )
+        
+        # Rate limit (429) 에러 처리
+        if response.status_code == 429:
+            if attempt < max_retries - 1:
+                # 에러 메시지에서 대기 시간 추출
+                error_data = response.json()
+                wait_time = 5.0  # 기본 대기 시간 3.0 → 5.0
+                
+                if 'error' in error_data and 'message' in error_data['error']:
+                    import re
+                    message = error_data['error']['message']
+                    # "Please try again in 2.1s" 형태에서 시간 추출
+                    match = re.search(r'try again in ([\d.]+)s', message)
+                    if match:
+                        wait_time = float(match.group(1)) + 1.0  # 여유를 두고 1.0초 추가 (0.5 → 1.0)
+                
+                print(f"⚠️  Rate limit hit. Waiting {wait_time:.1f}s... (attempt {attempt+1}/{max_retries})")
+                import time
+                time.sleep(wait_time)
+                continue
+            else:
+                print(f"❌ Rate limit exceeded after {max_retries} retries")
+                raise Exception(f"API rate limit exceeded after {max_retries} attempts")
+        
+        # 다른 에러 처리
+        if response.status_code != 200:
+            print(f"Error in API call: {response.text}")
+            raise Exception(f"API call failed with status {response.status_code}")
+        
+        # 성공
+        break
     
-    if response.status_code != 200:
-        print(f"Error in API call: {response.text}")
-        raise Exception(f"API call failed with status {response.status_code}")
-
     response_data = response.json()
 
     try:
@@ -476,7 +506,7 @@ if __name__ == "__main__":
         response = chat_request(
             messages=[system_msg, user_msg],
             temperature=0.3,
-            max_tokens=4000
+            max_tokens=100
         )
         print(f"Response: {response.content}")
     except Exception as e:
