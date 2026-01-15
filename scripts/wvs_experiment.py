@@ -44,7 +44,7 @@ COUNTRY_CODES = {
 ETHICAL_TOPICS = ["homosexuality", "abortion", "divorce", "suicide", "euthanasia", "prostitution", "death_penalty"]
 
 
-def parse_rating_from_response_advanced(response: str, topic: str, topic_index: int) -> int:
+def parse_rating_from_response_advanced(response: str, topic: str, topic_index: int, debug: bool = False) -> int:
     """
     개선된 평점 파싱 - 더 많은 패턴 지원
     
@@ -52,6 +52,7 @@ def parse_rating_from_response_advanced(response: str, topic: str, topic_index: 
         response: LLM 응답 전체
         topic: 주제 이름 (예: "homosexuality")
         topic_index: 주제 번호 (1-7)
+        debug: 디버그 모드
     
     Returns:
         평점 (1-10) 또는 -1 (파싱 실패)
@@ -59,47 +60,67 @@ def parse_rating_from_response_advanced(response: str, topic: str, topic_index: 
     # 응답을 줄 단위로 분리
     lines = response.strip().split('\n')
     
-    # 패턴 리스트 (우선순위 순)
+    # 🆕 더욱 강력한 패턴 리스트 (우선순위 순)
     patterns = [
-        # 1. "1. homosexuality: 7" 또는 "1. Homosexuality: 7"
+        # 1. "1. homosexuality: 7" 형태 (가장 일반적)
         rf"^\s*{topic_index}[\.\)]\s*{topic}\s*[:=\-–]\s*(\d+)",
         
         # 2. "homosexuality: 7" (번호 없이)
         rf"^\s*{topic}\s*[:=\-–]\s*(\d+)",
         
-        # 3. "1) 7" (숫자만, 번호 맞춤)
-        rf"^\s*{topic_index}[\.\)]\s*(\d+)\s*$",
+        # 3. 번호만 있는 경우: "1. 7" 또는 "1) 7"
+        rf"^\s*{topic_index}[\.\)]\s*[:=\-–]?\s*(\d+)\s*$",
         
-        # 4. "Homosexuality - 7"
-        rf"^\s*{topic}\s*[-–]\s*(\d+)",
+        # 4. 중간에 텍스트가 있는 경우: "1. homosexuality - Rating: 7"
+        rf"^\s*{topic_index}[\.\)]\s*{topic}.*?[:=\-–]\s*(\d+)",
         
-        # 5. "1. 7" (번호만 + 숫자)
-        rf"^\s*{topic_index}[\.\)]\s*[:=\-–]?\s*(\d+)",
-        
-        # 6. 줄 어디든 "homosexuality: 7" 형태
-        rf"{topic}\s*[:=\-–]\s*(\d+)",
-        
-        # 7. "1. ... 7" (번호 + 어떤 텍스트 + 숫자)
-        rf"^\s*{topic_index}[\.\)].+?(\d+)\s*$",
+        # 5. 줄 어디든 주제명 + 숫자 (느슨한 매칭)
+        rf"\b{topic}\b.*?[:=\-–]\s*(\d+)",
     ]
     
     # 각 줄에 대해 패턴 매칭 시도
     for line in lines:
         line_clean = line.strip()
+        if not line_clean:
+            continue
+            
         for pattern in patterns:
             match = re.search(pattern, line_clean, re.IGNORECASE)
             if match:
                 rating = int(match.group(1))
                 if 1 <= rating <= 10:
+                    if debug:
+                        print(f"✓ Matched '{topic}' with pattern '{pattern}' in line: '{line_clean[:80]}'")
                     return rating
     
-    # 전체 응답에서 주제 이름 근처의 숫자 찾기 (마지막 수단)
-    topic_pattern = rf"{topic}.{{0,30}}?(\d+)"
-    match = re.search(topic_pattern, response, re.IGNORECASE | re.DOTALL)
-    if match:
-        rating = int(match.group(1))
+    # 🆕 전체 응답에서 주제별로 검색 (콤마 구분 등)
+    # "homosexuality: 6, abortion: 7" 같은 경우
+    global_pattern = rf"\b{topic}\b\s*[:=\-–]\s*(\d+)"
+    global_match = re.search(global_pattern, response, re.IGNORECASE)
+    if global_match:
+        rating = int(global_match.group(1))
         if 1 <= rating <= 10:
+            if debug:
+                print(f"✓ Matched '{topic}' globally")
             return rating
+    
+    # 🆕 번호 기반 검색 (주제명이 없는 경우 대비)
+    # "3: 8" 또는 "3. 8" 형태 찾기
+    number_pattern = rf"^\s*{topic_index}[\.\):\s]+(\d+)\s*$"
+    for line in lines:
+        match = re.search(number_pattern, line.strip())
+        if match:
+            rating = int(match.group(1))
+            if 1 <= rating <= 10:
+                if debug:
+                    print(f"✓ Matched '{topic}' by number {topic_index} in line: '{line.strip()}'")
+                return rating
+    
+    if debug:
+        print(f"✗ Failed to parse '{topic}' (index {topic_index})")
+        print(f"  Full response:")
+        print(f"  {response}")
+        print(f"  ---")
     
     return -1
 
@@ -183,7 +204,7 @@ def run_single_turn_experiment(
             response = chat_request(
                 messages=messages,
                 temperature=temp,
-                max_tokens=max_tokens,
+                max_tokens=1000,  # 🆕 500 → 1000으로 증가
                 model=model
             )
             
@@ -192,9 +213,11 @@ def run_single_turn_experiment(
             # 🆕 디버그 모드: 첫 5개 응답 출력
             if debug and i < 5:
                 print(f"\n{'='*60}")
-                print(f"DEBUG: Persona {i} Response:")
+                print(f"DEBUG: Persona {i} Response (FULL):")
                 print(f"{'='*60}")
                 print(response_text)
+                print(f"{'='*60}")
+                print(f"Response length: {len(response_text)} characters")
                 print(f"{'='*60}\n")
             
             # Rate limit 방지를 위한 짧은 대기
@@ -203,7 +226,7 @@ def run_single_turn_experiment(
             # 각 주제별 평점 추출 (개선된 파싱)
             ratings_dict = {}
             for j, topic in enumerate(ETHICAL_TOPICS, 1):
-                rating = parse_rating_from_response_advanced(response_text, topic, j)
+                rating = parse_rating_from_response_advanced(response_text, topic, j, debug=debug)
                 
                 if 1 <= rating <= 10:
                     ratings_dict[topic] = rating
@@ -213,7 +236,7 @@ def run_single_turn_experiment(
                     parsing_failures[topic] += 1
                     
                     # 🆕 파싱 실패 경고 (처음 3번만)
-                    if parsing_failures[topic] <= 3 and debug:
+                    if parsing_failures[topic] <= 3:
                         print(f"⚠️  Parsing failed for persona {i}, topic '{topic}'")
                         print(f"   Response snippet: {response_text[:200]}...")
             
@@ -272,7 +295,7 @@ def run_single_turn_experiment(
                     
                     ratings_dict = {}
                     for j, topic in enumerate(ETHICAL_TOPICS, 1):
-                        rating = parse_rating_from_response_advanced(response_text, topic, j)
+                        rating = parse_rating_from_response_advanced(response_text, topic, j, debug=debug)
                         
                         if 1 <= rating <= 10:
                             ratings_dict[topic] = rating

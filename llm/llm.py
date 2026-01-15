@@ -199,11 +199,15 @@ def _chat_request_gemini(
             if gemini_msg:
                 conversation_messages.append(gemini_msg)
     
-    generation_config = {"temperature": temperature}
+    generation_config = {
+        "temperature": temperature,
+        "top_p": 0.95,
+        "top_k": 40,
+    }
     if max_tokens > 0:
         generation_config["max_output_tokens"] = max_tokens
     
-    # 🔥 안전 설정 추가 (모든 필터 비활성화)
+    # 🔥 안전 설정 (모든 필터 완전히 비활성화)
     safety_settings = [
         {
             "category": "HARM_CATEGORY_HARASSMENT",
@@ -226,7 +230,7 @@ def _chat_request_gemini(
     model_instance = genai.GenerativeModel(
         model_name=model,
         generation_config=generation_config,
-        safety_settings=safety_settings,  # 🔥 추가
+        safety_settings=safety_settings,
         system_instruction=system_instruction
     )
     
@@ -240,7 +244,35 @@ def _chat_request_gemini(
     chat = model_instance.start_chat(history=history)
     
     last_user_message = conversation_messages[-1]["parts"][0]["text"]
-    response = chat.send_message(last_user_message)
+    
+    # 🔥 응답 생성 시 추가 설정
+    response = chat.send_message(
+        last_user_message,
+        safety_settings=safety_settings  # 한 번 더 명시
+    )
+    
+    # 🔥 디버그: finish_reason과 safety_ratings 확인
+    if hasattr(response, 'candidates') and len(response.candidates) > 0:
+        candidate = response.candidates[0]
+        finish_reason = candidate.finish_reason
+        
+        # finish_reason 로깅
+        if finish_reason != 1:  # 1 = STOP (정상 완료)
+            print(f"⚠️  WARNING: Gemini finish_reason = {finish_reason}")
+            print(f"   0=FINISH_REASON_UNSPECIFIED, 1=STOP, 2=MAX_TOKENS, 3=SAFETY, 4=RECITATION, 5=OTHER")
+            
+        # safety_ratings 로깅
+        if hasattr(candidate, 'safety_ratings'):
+            for rating in candidate.safety_ratings:
+                if rating.probability not in [1]:  # 1 = NEGLIGIBLE
+                    print(f"⚠️  Safety issue: {rating.category} = {rating.probability}")
+    
+    # 🔥 응답이 안전 필터에 의해 차단되었는지 확인
+    if not response.text:
+        print(f"⚠️  WARNING: Empty response from Gemini")
+        print(f"   Prompt feedback: {response.prompt_feedback}")
+        print(f"   Candidates: {response.candidates}")
+        raise Exception("Gemini returned empty response - possibly blocked by safety filter")
     
     time = int(np.max([message.time for message in messages]) + 1)
     return Message(time=time, content=response.text, role='assistant')

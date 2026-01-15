@@ -1,4 +1,3 @@
-
 from llm.llm import chat_request, Message, create_system_message, create_user_message
 
 from dataclasses import dataclass
@@ -338,18 +337,22 @@ class WVSEthicalQuestions:
         """모든 질문을 single turn 형식으로 반환"""
         
         if return_number_only:
-            # 매우 간결한 프롬프트 (Gemini가 잘 따름)
-            return """Rate these on a scale of 1-10 (1=never justifiable, 10=always justifiable):
+            # 🔥 예시 제거, 직접적인 지시로 변경
+            return """You are completing the World Values Survey (WVS) Wave 7 questionnaire.
 
-    1. homosexuality
-    2. abortion
-    3. divorce
-    4. suicide
-    5. euthanasia
-    6. prostitution
-    7. death_penalty
+Rate EXACTLY 7 items on justifiability (1=never justifiable, 10=always justifiable).
 
-    Format: "1. homosexuality: [number]" (one per line, numbers only)"""
+YOU MUST COMPLETE ALL 7 ITEMS. OUTPUT FORMAT:
+
+1. homosexuality: [1-10]
+2. abortion: [1-10]
+3. divorce: [1-10]
+4. suicide: [1-10]
+5. euthanasia: [1-10]
+6. prostitution: [1-10]
+7. death_penalty: [1-10]
+
+BEGIN YOUR RESPONSE NOW. Write all 7 lines."""
         else:
             questions = []
             for i, (topic, question) in enumerate(cls.ETHICAL_QUESTIONS.items(), 1):
