@@ -476,7 +476,7 @@ if __name__ == "__main__":
         response = chat_request(
             messages=[system_msg, user_msg],
             temperature=0.3,
-            max_tokens=100
+            max_tokens=4000
         )
         print(f"Response: {response.content}")
     except Exception as e:

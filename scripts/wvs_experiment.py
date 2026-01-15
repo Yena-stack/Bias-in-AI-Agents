@@ -153,7 +153,7 @@ def run_single_turn_experiment(
     num_personas: int = 100,
     random_seed: int = 42,
     temp: float = 0.3,
-    max_tokens: int = 500,
+    max_tokens: int = 4000,
     model: str = None,
     debug: bool = False  # 🆕 디버그 모드
 ) -> Tuple[List[Dict], Dict]:
@@ -204,7 +204,7 @@ def run_single_turn_experiment(
             response = chat_request(
                 messages=messages,
                 temperature=temp,
-                max_tokens=1000,  # 🆕 500 → 1000으로 증가
+                max_tokens=4000
                 model=model
             )
             
@@ -461,7 +461,7 @@ if __name__ == '__main__':
                 num_personas=args.num_personas,
                 random_seed=args.seed,
                 temp=args.temperature,
-                max_tokens=500,
+                max_tokens=4000,
                 model=args.model,
                 debug=args.debug  # 🆕
             )

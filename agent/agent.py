@@ -275,7 +275,7 @@ IMPORTANT INSTRUCTIONS:
     def respond_to_ethical_question(
         self, 
         question: str, 
-        max_tokens: int = 2000,
+        max_tokens: int = 4000,
         model: Optional[str] = None
     ) -> Any:
         """
