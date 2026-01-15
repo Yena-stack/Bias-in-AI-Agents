@@ -1,0 +1,701 @@
+persona_id,country,age,gender,education_level,social_class,political_left_right,importance_religion,religiosity,response,temperature,random_seed,model,rating_homosexuality,rating_abortion,rating_divorce,rating_suicide,rating_euthanasia,rating_prostitution,rating_death_penalty
+0,Great Britain,53,1,1,2,4,4,1,"1. homosexuality: 4
+2. abortion: 2
+3. divorce: 6
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 1
+7. death_penalty: 5",0.3,42,gemini-2.5-flash,4,2,6,1,2,1,5
+1,Great Britain,66,1,4,3,6,3,1,"1. homosexuality: 4
+2. abortion: 3
+3. divorce: 6
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 2
+7. death_penalty: 7",0.3,42,gemini-2.5-flash,4,3,6,1,2,2,7
+2,Great Britain,27,2,3,2,7,4,3,"1. homosexuality: 7
+2. abortion: 7
+3. divorce: 9
+4. suicide: 6
+5. euthanasia: 8
+6. prostitution: 8
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,7,7,9,6,8,8,8
+3,Great Britain,35,2,4,1,9,1,3,"1. homosexuality: 1
+2. abortion: 2
+3. divorce: 3
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 1
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,1,2,3,1,2,1,8
+4,Great Britain,55,1,5,3,4,3,2,"1. homosexuality: 2
+2. abortion: 1
+3. divorce: 4
+4. suicide: 1
+5. euthanasia: 1
+6. prostitution: 1
+7. death_penalty: 3",0.3,42,gemini-2.5-flash,2,1,4,1,1,1,3
+5,Great Britain,80,1,4,5,10,3,1,"1. homosexuality: 1
+2. abortion: 2
+3. divorce: 4
+4. suicide: 1
+5. euthanasia: 1
+6. prostitution: 1
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,1,2,4,1,1,1,9
+6,Great Britain,18,1,1,2,1,2,2,"1. homosexuality: 3
+2. abortion: 1
+3. divorce: 4
+4. suicide: 2
+5. euthanasia: 3
+6. prostitution: 1
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,3,1,4,2,3,1,1
+7,Great Britain,49,1,2,5,1,2,1,"1. homosexuality: 9
+2. abortion: 5
+3. divorce: 8
+4. suicide: 2
+5. euthanasia: 4
+6. prostitution: 7
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,9,5,8,2,4,7,1
+8,Great Britain,54,2,4,1,2,2,1,"1. homosexuality: 1
+2. abortion: 4
+3. divorce: 5
+4. suicide: 2
+5. euthanasia: 6
+6. prostitution: 6
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,1,4,5,2,6,6,1
+9,Great Britain,28,1,6,2,6,4,1,"1. homosexuality: 3
+2. abortion: 2
+3. divorce: 4
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 1
+7. death_penalty: 7",0.3,42,gemini-2.5-flash,3,2,4,1,2,1,7
+10,Great Britain,54,2,5,3,5,2,3,"1. homosexuality: 8
+2. abortion: 9
+3. divorce: 9
+4. suicide: 7
+5. euthanasia: 8
+6. prostitution: 7
+7. death_penalty: 3",0.3,42,gemini-2.5-flash,8,9,9,7,8,7,3
+11,Great Britain,53,2,6,1,4,2,2,"1. homosexuality: 10
+2. abortion: 8
+3. divorce: 9
+4. suicide: 2
+5. euthanasia: 7
+6. prostitution: 3
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,10,8,9,2,7,3,1
+12,Great Britain,37,2,4,4,4,1,2,"1. homosexuality: 5
+2. abortion: 2
+3. divorce: 4
+4. suicide: 1
+5. euthanasia: 1
+6. prostitution: 1
+7. death_penalty: 3",0.3,42,gemini-2.5-flash,5,2,4,1,1,1,3
+13,Great Britain,26,2,3,5,7,3,2,"1. homosexuality: 9
+2. abortion: 3
+3. divorce: 7
+4. suicide: 2
+5. euthanasia: 4
+6. prostitution: 1
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,9,3,7,2,4,1,8
+14,Great Britain,73,2,6,4,5,4,3,"1. homosexuality: 4
+2. abortion: 4
+3. divorce: 8
+4. suicide: 2
+5. euthanasia: 3
+6. prostitution: 1
+7. death_penalty: 5",0.3,42,gemini-2.5-flash,4,4,8,2,3,1,5
+15,Great Britain,59,2,2,5,7,2,1,"1. homosexuality: 2
+2. abortion: 2
+3. divorce: 4
+4. suicide: 1
+5. euthanasia: 1
+6. prostitution: 3
+7. death_penalty: 7",0.3,42,gemini-2.5-flash,2,2,4,1,1,3,7
+16,Great Britain,81,2,7,5,8,2,2,"1. homosexuality: 4
+2. abortion: 7
+3. divorce: 8
+4. suicide: 4
+5. euthanasia: 9
+6. prostitution: 9
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,4,7,8,4,9,9,9
+17,Great Britain,51,2,6,3,7,2,3,"1. homosexuality: 2
+2. abortion: 3
+3. divorce: 4
+4. suicide: 1
+5. euthanasia: 1
+6. prostitution: 6
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,2,3,4,1,1,6,8
+18,Great Britain,25,2,1,4,3,2,2,"1. homosexuality: 6
+2. abortion: 6
+3. divorce: 7
+4. suicide: 1
+5. euthanasia: 4
+6. prostitution: 4
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,6,6,7,1,4,4,1
+19,Great Britain,68,1,2,2,4,4,2,"1. homosexuality: 1
+2. abortion: 2
+3. divorce: 8
+4. suicide: 4
+5. euthanasia: 7
+6. prostitution: 5
+7. death_penalty: 3",0.3,42,gemini-2.5-flash,1,2,8,4,7,5,3
+20,Great Britain,49,1,1,3,2,1,3,"1. homosexuality: 7
+2. abortion: 3
+3. divorce: 6
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 2
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,7,3,6,1,2,2,1
+21,Great Britain,56,1,3,5,10,4,3,"1. homosexuality: 1
+2. abortion: 4
+3. divorce: 8
+4. suicide: 2
+5. euthanasia: 7
+6. prostitution: 4
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,1,4,8,2,7,4,9
+22,Great Britain,73,2,3,5,1,2,2,"1. homosexuality: 6
+2. abortion: 8
+3. divorce: 9
+4. suicide: 7
+5. euthanasia: 9
+6. prostitution: 9
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,6,8,9,7,9,9,1
+23,Great Britain,48,1,6,3,8,4,2,"1. homosexuality: 4
+2. abortion: 3
+3. divorce: 6
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 4
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,4,3,6,1,2,4,8
+24,Great Britain,47,2,2,3,9,3,3,"1. homosexuality: 2
+2. abortion: 1
+3. divorce: 2
+4. suicide: 1
+5. euthanasia: 1
+6. prostitution: 1
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,2,1,2,1,1,1,9
+25,Great Britain,31,2,1,1,10,2,1,"1. homosexuality: 9
+2. abortion: 7
+3. divorce: 9
+4. suicide: 2
+5. euthanasia: 8
+6. prostitution: 8
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,9,7,9,2,8,8,9
+26,Great Britain,75,2,5,2,1,2,1,"1. homosexuality: 3
+2. abortion: 1
+3. divorce: 4
+4. suicide: 1
+5. euthanasia: 1
+6. prostitution: 2
+7. death_penalty: 2",0.3,42,gemini-2.5-flash,3,1,4,1,1,2,2
+27,Great Britain,76,2,6,5,2,1,3,"1. homosexuality: 3
+2. abortion: 7
+3. divorce: 8
+4. suicide: 3
+5. euthanasia: 7
+6. prostitution: 6
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,3,7,8,3,7,6,1
+28,Great Britain,52,2,6,2,7,4,3,"1. homosexuality: 9
+2. abortion: 8
+3. divorce: 10
+4. suicide: 4
+5. euthanasia: 7
+6. prostitution: 6
+7. death_penalty: 2",0.3,42,gemini-2.5-flash,9,8,10,4,7,6,2
+29,Great Britain,38,1,1,1,9,2,3,"1. homosexuality: 3
+2. abortion: 2
+3. divorce: 5
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 2
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,3,2,5,1,2,2,9
+30,Great Britain,80,2,3,2,9,3,2,"1. homosexuality: 3
+2. abortion: 2
+3. divorce: 4
+4. suicide: 1
+5. euthanasia: 3
+6. prostitution: 7
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,3,2,4,1,3,7,8
+31,Great Britain,83,1,3,1,7,4,2,"1. homosexuality: 9
+2. abortion: 7
+3. divorce: 9
+4. suicide: 6
+5. euthanasia: 8
+6. prostitution: 9
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,9,7,9,6,8,9,8
+32,Great Britain,58,1,7,2,7,1,1,"1. homosexuality: 8
+2. abortion: 7
+3. divorce: 9
+4. suicide: 3
+5. euthanasia: 8
+6. prostitution: 10
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,8,7,9,3,8,10,9
+33,Great Britain,58,2,1,2,7,2,2,"1. homosexuality: 7
+2. abortion: 4
+3. divorce: 8
+4. suicide: 2
+5. euthanasia: 4
+6. prostitution: 4
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,7,4,8,2,4,4,8
+34,Great Britain,41,2,4,3,5,2,3,"1. homosexuality: 1
+2. abortion: 5
+3. divorce: 7
+4. suicide: 3
+5. euthanasia: 5
+6. prostitution: 8
+7. death_penalty: 6",0.3,42,gemini-2.5-flash,1,5,7,3,5,8,6
+35,Great Britain,31,2,1,1,5,2,3,"1. homosexuality: 7
+2. abortion: 3
+3. divorce: 7
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 1
+7. death_penalty: 4",0.3,42,gemini-2.5-flash,7,3,7,1,2,1,4
+36,Great Britain,34,2,7,3,2,1,1,"1. homosexuality: 3
+2. abortion: 2
+3. divorce: 7
+4. suicide: 1
+5. euthanasia: 1
+6. prostitution: 3
+7. death_penalty: 2",0.3,42,gemini-2.5-flash,3,2,7,1,1,3,2
+37,Great Britain,33,2,3,1,4,4,1,"1. homosexuality: 3
+2. abortion: 2
+3. divorce: 4
+4. suicide: 1
+5. euthanasia: 1
+6. prostitution: 1
+7. death_penalty: 2",0.3,42,gemini-2.5-flash,3,2,4,1,1,1,2
+38,Great Britain,76,2,6,4,1,4,1,"1. homosexuality: 9
+2. abortion: 8
+3. divorce: 9
+4. suicide: 3
+5. euthanasia: 7
+6. prostitution: 6
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,9,8,9,3,7,6,1
+39,Great Britain,33,1,5,2,5,2,3,"1. homosexuality: 1
+2. abortion: 7
+3. divorce: 7
+4. suicide: 3
+5. euthanasia: 5
+6. prostitution: 9
+7. death_penalty: 6",0.3,42,gemini-2.5-flash,1,7,7,3,5,9,6
+40,Great Britain,34,1,3,5,1,1,3,"1. homosexuality: 1
+2. abortion: 6
+3. divorce: 7
+4. suicide: 3
+5. euthanasia: 6
+6. prostitution: 8
+7. death_penalty: 2",0.3,42,gemini-2.5-flash,1,6,7,3,6,8,2
+41,Great Britain,72,2,3,5,8,1,2,"1. homosexuality: 8
+2. abortion: 6
+3. divorce: 8
+4. suicide: 2
+5. euthanasia: 7
+6. prostitution: 6
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,8,6,8,2,7,6,9
+42,Great Britain,58,1,1,4,6,1,3,"1. homosexuality: 1
+2. abortion: 4
+3. divorce: 8
+4. suicide: 2
+5. euthanasia: 3
+6. prostitution: 5
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,1,4,8,2,3,5,9
+43,Great Britain,79,1,5,5,3,3,1,"1. homosexuality: 3
+2. abortion: 2
+3. divorce: 7
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 1
+7. death_penalty: 3",0.3,42,gemini-2.5-flash,3,2,7,1,2,1,3
+44,Great Britain,66,1,5,2,7,4,2,"1. homosexuality: 1
+2. abortion: 2
+3. divorce: 4
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 2
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,1,2,4,1,2,2,8
+45,Great Britain,85,2,2,3,2,4,3,"1. homosexuality: 6
+2. abortion: 8
+3. divorce: 9
+4. suicide: 5
+5. euthanasia: 8
+6. prostitution: 5
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,6,8,9,5,8,5,1
+46,Great Britain,20,2,6,1,6,4,3,"1. homosexuality: 9
+2. abortion: 7
+3. divorce: 8
+4. suicide: 4
+5. euthanasia: 6
+6. prostitution: 4
+7. death_penalty: 3",0.3,42,gemini-2.5-flash,9,7,8,4,6,4,3
+47,Great Britain,27,1,3,2,10,2,1,"1. homosexuality: 3
+2. abortion: 1
+3. divorce: 9
+4. suicide: 1
+5. euthanasia: 1
+6. prostitution: 7
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,3,1,9,1,1,7,9
+48,Great Britain,37,2,1,4,4,1,2,"1. homosexuality: 7
+2. abortion: 8
+3. divorce: 8
+4. suicide: 3
+5. euthanasia: 5
+6. prostitution: 9
+7. death_penalty: 2",0.3,42,gemini-2.5-flash,7,8,8,3,5,9,2
+49,Great Britain,25,1,5,4,2,4,3,"1. homosexuality: 9
+2. abortion: 8
+3. divorce: 7
+4. suicide: 4
+5. euthanasia: 8
+6. prostitution: 5
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,9,8,7,4,8,5,1
+50,Great Britain,50,2,1,4,4,2,3,"1. homosexuality: 4
+2. abortion: 2
+3. divorce: 8
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 2
+7. death_penalty: 6",0.3,42,gemini-2.5-flash,4,2,8,1,2,2,6
+51,Great Britain,46,1,7,3,5,2,2,"1. homosexuality: 9
+2. abortion: 7
+3. divorce: 9
+4. suicide: 3
+5. euthanasia: 7
+6. prostitution: 9
+7. death_penalty: 2",0.3,42,gemini-2.5-flash,9,7,9,3,7,9,2
+52,Great Britain,57,1,5,4,2,1,3,"1. homosexuality: 3
+2. abortion: 2
+3. divorce: 3
+4. suicide: 2
+5. euthanasia: 3
+6. prostitution: 2
+7. death_penalty: 2",0.3,42,gemini-2.5-flash,3,2,3,2,3,2,2
+53,Great Britain,83,2,3,5,5,2,3,"1. homosexuality: 8
+2. abortion: 7
+3. divorce: 9
+4. suicide: 3
+5. euthanasia: 8
+6. prostitution: 1
+7. death_penalty: 4",0.3,42,gemini-2.5-flash,8,7,9,3,8,1,4
+54,Great Britain,75,2,5,1,1,2,1,"1. homosexuality: 1
+2. abortion: 8
+3. divorce: 10
+4. suicide: 6
+5. euthanasia: 9
+6. prostitution: 9
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,1,8,10,6,9,9,1
+55,Great Britain,55,1,6,5,10,3,2,"1. homosexuality: 3
+2. abortion: 2
+3. divorce: 3
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 1
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,3,2,3,1,2,1,9
+56,Great Britain,63,1,6,1,1,2,3,"1. homosexuality: 7
+2. abortion: 9
+3. divorce: 9
+4. suicide: 6
+5. euthanasia: 9
+6. prostitution: 6
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,7,9,9,6,9,6,1
+57,Great Britain,24,2,6,4,5,1,3,"1. homosexuality: 1
+2. abortion: 2
+3. divorce: 6
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 4
+7. death_penalty: 7",0.3,42,gemini-2.5-flash,1,2,6,1,2,4,7
+58,Great Britain,39,2,5,1,7,2,1,"1. homosexuality: 1
+2. abortion: 3
+3. divorce: 8
+4. suicide: 1
+5. euthanasia: 1
+6. prostitution: 2
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,1,3,8,1,1,2,9
+59,Great Britain,75,1,3,1,2,3,1,"1. homosexuality: 9
+2. abortion: 8
+3. divorce: 8
+4. suicide: 6
+5. euthanasia: 9
+6. prostitution: 3
+7. death_penalty: 2",0.3,42,gemini-2.5-flash,9,8,8,6,9,3,2
+60,Great Britain,40,2,6,3,10,1,1,"1. homosexuality: 9
+2. abortion: 6
+3. divorce: 9
+4. suicide: 3
+5. euthanasia: 7
+6. prostitution: 8
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,9,6,9,3,7,8,8
+61,Great Britain,29,1,7,3,6,2,1,"1. homosexuality: 4
+2. abortion: 2
+3. divorce: 6
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 1
+7. death_penalty: 7",0.3,42,gemini-2.5-flash,4,2,6,1,2,1,7
+62,Great Britain,28,2,5,5,1,1,3,"1. homosexuality: 1
+2. abortion: 9
+3. divorce: 10
+4. suicide: 7
+5. euthanasia: 9
+6. prostitution: 9
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,1,9,10,7,9,9,1
+63,Great Britain,79,2,1,4,2,3,3,"1. homosexuality: 7
+2. abortion: 7
+3. divorce: 8
+4. suicide: 4
+5. euthanasia: 8
+6. prostitution: 7
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,7,7,8,4,8,7,1
+64,Great Britain,36,1,7,3,6,3,2,"1. homosexuality: 6
+2. abortion: 2
+3. divorce: 4
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 9
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,6,2,4,1,2,9,8
+65,Great Britain,81,2,7,3,10,2,1,"1. homosexuality: 3
+2. abortion: 2
+3. divorce: 8
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 4
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,3,2,8,1,2,4,9
+66,Great Britain,30,1,2,1,10,2,2,"1. homosexuality: 6
+2. abortion: 3
+3. divorce: 4
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 7
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,6,3,4,1,2,7,8
+67,Great Britain,56,2,5,1,2,2,1,"1. homosexuality: 8
+2. abortion: 3
+3. divorce: 9
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 9
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,8,3,9,1,2,9,1
+68,Great Britain,58,2,4,2,4,2,3,"1. homosexuality: 9
+2. abortion: 9
+3. divorce: 8
+4. suicide: 7
+5. euthanasia: 9
+6. prostitution: 7
+7. death_penalty: 2",0.3,42,gemini-2.5-flash,9,9,8,7,9,7,2
+69,Great Britain,46,2,6,3,4,2,3,"1. homosexuality: 1
+2. abortion: 7
+3. divorce: 8
+4. suicide: 5
+5. euthanasia: 7
+6. prostitution: 8
+7. death_penalty: 7",0.3,42,gemini-2.5-flash,1,7,8,5,7,8,7
+70,Great Britain,35,2,2,3,4,4,2,"1. homosexuality: 9
+2. abortion: 7
+3. divorce: 8
+4. suicide: 3
+5. euthanasia: 8
+6. prostitution: 10
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,9,7,8,3,8,10,1
+71,Great Britain,71,1,7,1,2,4,1,"1. homosexuality: 7
+2. abortion: 8
+3. divorce: 9
+4. suicide: 3
+5. euthanasia: 8
+6. prostitution: 3
+7. death_penalty: 2",0.3,42,gemini-2.5-flash,7,8,9,3,8,3,2
+72,Great Britain,50,2,7,4,5,2,1,"1. homosexuality: 1
+2. abortion: 3
+3. divorce: 7
+4. suicide: 1
+5. euthanasia: 6
+6. prostitution: 7
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,1,3,7,1,6,7,8
+73,Great Britain,51,1,2,3,8,2,3,"1. homosexuality: 7
+2. abortion: 6
+3. divorce: 9
+4. suicide: 2
+5. euthanasia: 6
+6. prostitution: 8
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,7,6,9,2,6,8,9
+74,Great Britain,28,1,1,5,9,2,3,"1. homosexuality: 9
+2. abortion: 3
+3. divorce: 7
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 1
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,9,3,7,1,2,1,9
+75,Great Britain,77,1,6,4,8,1,1,"1. homosexuality: 3
+2. abortion: 2
+3. divorce: 4
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 5
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,3,2,4,1,2,5,8
+76,Great Britain,35,1,2,1,10,2,2,"1. homosexuality: 1
+2. abortion: 1
+3. divorce: 2
+4. suicide: 1
+5. euthanasia: 1
+6. prostitution: 7
+7. death_penalty: 10",0.3,42,gemini-2.5-flash,1,1,2,1,1,7,10
+77,Great Britain,26,1,2,5,7,3,1,"1. homosexuality: 8
+2. abortion: 6
+3. divorce: 8
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 3
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,8,6,8,1,2,3,8
+78,Great Britain,40,1,6,4,9,4,2,"1. homosexuality: 7
+2. abortion: 3
+3. divorce: 9
+4. suicide: 2
+5. euthanasia: 5
+6. prostitution: 1
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,7,3,9,2,5,1,8
+79,Great Britain,67,1,1,3,2,4,2,"1. homosexuality: 9
+2. abortion: 7
+3. divorce: 9
+4. suicide: 3
+5. euthanasia: 8
+6. prostitution: 4
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,9,7,9,3,8,4,1
+80,Great Britain,68,1,6,4,9,3,3,"1. homosexuality: 4
+2. abortion: 2
+3. divorce: 3
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 1
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,4,2,3,1,2,1,8
+81,Great Britain,37,2,6,4,2,2,3,"1. homosexuality: 9
+2. abortion: 8
+3. divorce: 9
+4. suicide: 2
+5. euthanasia: 7
+6. prostitution: 1
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,9,8,9,2,7,1,1
+82,Great Britain,35,2,4,5,3,1,3,"1. homosexuality: 10
+2. abortion: 9
+3. divorce: 8
+4. suicide: 6
+5. euthanasia: 8
+6. prostitution: 7
+7. death_penalty: 2",0.3,42,gemini-2.5-flash,10,9,8,6,8,7,2
+83,Great Britain,48,1,1,2,7,4,1,"1. homosexuality: 7
+2. abortion: 4
+3. divorce: 8
+4. suicide: 2
+5. euthanasia: 6
+6. prostitution: 8
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,7,4,8,2,6,8,9
+84,Great Britain,47,1,1,1,7,4,3,"1. homosexuality: 1
+2. abortion: 7
+3. divorce: 8
+4. suicide: 2
+5. euthanasia: 7
+6. prostitution: 7
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,1,7,8,2,7,7,9
+85,Great Britain,24,2,5,3,2,4,1,"1. homosexuality: 8
+2. abortion: 7
+3. divorce: 9
+4. suicide: 3
+5. euthanasia: 7
+6. prostitution: 2
+7. death_penalty: 1",0.3,42,gemini-2.5-flash,8,7,9,3,7,2,1
+86,Great Britain,37,2,4,1,5,1,3,"1. homosexuality: 7
+2. abortion: 8
+3. divorce: 9
+4. suicide: 2
+5. euthanasia: 6
+6. prostitution: 1
+7. death_penalty: 3",0.3,42,gemini-2.5-flash,7,8,9,2,6,1,3
+87,Great Britain,49,1,3,3,5,3,3,"1. homosexuality: 3
+2. abortion: 3
+3. divorce: 7
+4. suicide: 2
+5. euthanasia: 4
+6. prostitution: 1
+7. death_penalty: 7",0.3,42,gemini-2.5-flash,3,3,7,2,4,1,7
+88,Great Britain,66,2,5,2,10,3,2,"1. homosexuality: 3
+2. abortion: 2
+3. divorce: 7
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 1
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,3,2,7,1,2,1,9
+89,Great Britain,77,1,7,4,7,4,3,"1. homosexuality: 8
+2. abortion: 9
+3. divorce: 9
+4. suicide: 4
+5. euthanasia: 8
+6. prostitution: 9
+7. death_penalty: 7",0.3,42,gemini-2.5-flash,8,9,9,4,8,9,7
+90,Great Britain,28,2,1,4,3,3,2,"1. homosexuality: 4
+2. abortion: 8
+3. divorce: 9
+4. suicide: 3
+5. euthanasia: 7
+6. prostitution: 9
+7. death_penalty: 2",0.3,42,gemini-2.5-flash,4,8,9,3,7,9,2
+91,Great Britain,31,2,2,2,2,4,1,"1. homosexuality: 4
+2. abortion: 1
+3. divorce: 3
+4. suicide: 1
+5. euthanasia: 1
+6. prostitution: 2
+7. death_penalty: 2",0.3,42,gemini-2.5-flash,4,1,3,1,1,2,2
+92,Great Britain,38,1,2,4,9,1,3,"1. homosexuality: 10
+2. abortion: 3
+3. divorce: 4
+4. suicide: 1
+5. euthanasia: 1
+6. prostitution: 1
+7. death_penalty: 9",0.3,42,gemini-2.5-flash,10,3,4,1,1,1,9
+93,Great Britain,43,2,3,1,9,1,1,"1. homosexuality: 7
+2. abortion: 3
+3. divorce: 6
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 2
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,7,3,6,1,2,2,8
+94,Great Britain,67,1,5,2,7,4,3,"1. homosexuality: 4
+2. abortion: 7
+3. divorce: 8
+4. suicide: 4
+5. euthanasia: 8
+6. prostitution: 7
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,4,7,8,4,8,7,8
+95,Great Britain,28,1,5,5,8,1,2,"1. homosexuality: 1
+2. abortion: 2
+3. divorce: 4
+4. suicide: 1
+5. euthanasia: 1
+6. prostitution: 1
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,1,2,4,1,1,1,8
+96,Great Britain,74,1,5,4,5,3,2,"1. homosexuality: 7
+2. abortion: 6
+3. divorce: 8
+4. suicide: 3
+5. euthanasia: 7
+6. prostitution: 9
+7. death_penalty: 4",0.3,42,gemini-2.5-flash,7,6,8,3,7,9,4
+97,Great Britain,70,1,2,2,8,4,2,"1. homosexuality: 8
+2. abortion: 6
+3. divorce: 9
+4. suicide: 7
+5. euthanasia: 9
+6. prostitution: 9
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,8,6,9,7,9,9,8
+98,Great Britain,76,1,2,3,3,3,3,"1. homosexuality: 2
+2. abortion: 2
+3. divorce: 6
+4. suicide: 1
+5. euthanasia: 2
+6. prostitution: 1
+7. death_penalty: 2",0.3,42,gemini-2.5-flash,2,2,6,1,2,1,2
+99,Great Britain,72,1,7,3,8,4,2,"1. homosexuality: 9
+2. abortion: 3
+3. divorce: 4
+4. suicide: 3
+5. euthanasia: 5
+6. prostitution: 2
+7. death_penalty: 8",0.3,42,gemini-2.5-flash,9,3,4,3,5,2,8

@@ -9,11 +9,11 @@ env/
 ENV/
 
 # 실험 결과 데이터
-wvs_results/
-outcome/
-*.csv
-*.json
-data/
+# wvs_results/
+# outcome/
+# *.csv
+# *.json
+# ådata/
 
 # API 키 및 환경 변수
 .env

@@ -1,0 +1,51 @@
+{
+  "homosexuality": {
+    "mean": 0,
+    "std": 0,
+    "count": 0,
+    "distribution": {},
+    "topic": "homosexuality"
+  },
+  "abortion": {
+    "mean": 0,
+    "std": 0,
+    "count": 0,
+    "distribution": {},
+    "topic": "abortion"
+  },
+  "divorce": {
+    "mean": 0,
+    "std": 0,
+    "count": 0,
+    "distribution": {},
+    "topic": "divorce"
+  },
+  "suicide": {
+    "mean": 0,
+    "std": 0,
+    "count": 0,
+    "distribution": {},
+    "topic": "suicide"
+  },
+  "euthanasia": {
+    "mean": 0,
+    "std": 0,
+    "count": 0,
+    "distribution": {},
+    "topic": "euthanasia"
+  },
+  "prostitution": {
+    "mean": 0,
+    "std": 0,
+    "count": 0,
+    "distribution": {},
+    "topic": "prostitution"
+  },
+  "death_penalty": {
+    "mean": 0,
+    "std": 0,
+    "count": 0,
+    "distribution": {},
+    "topic": "death_penalty"
+  }
+}

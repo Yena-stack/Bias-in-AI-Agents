@@ -1,0 +1,6 @@
+persona_id,country,age,gender,error,rating_homosexuality,rating_abortion,rating_divorce,rating_suicide,rating_euthanasia,rating_prostitution,rating_death_penalty
+0,Netherlands,53,1,No module named 'google.generativeai',-1,-1,-1,-1,-1,-1,-1
+1,Netherlands,66,1,No module named 'google.generativeai',-1,-1,-1,-1,-1,-1,-1
+2,Netherlands,27,2,No module named 'google.generativeai',-1,-1,-1,-1,-1,-1,-1
+3,Netherlands,35,2,No module named 'google.generativeai',-1,-1,-1,-1,-1,-1,-1
+4,Netherlands,55,1,No module named 'google.generativeai',-1,-1,-1,-1,-1,-1,-1

@@ -1,0 +1,6 @@
+persona_id,country,age,gender,error,rating_homosexuality,rating_abortion,rating_divorce,rating_suicide,rating_euthanasia,rating_prostitution,rating_death_penalty
+0,Japan,53,1,No module named 'google.generativeai',-1,-1,-1,-1,-1,-1,-1
+1,Japan,66,1,No module named 'google.generativeai',-1,-1,-1,-1,-1,-1,-1
+2,Japan,27,2,No module named 'google.generativeai',-1,-1,-1,-1,-1,-1,-1
+3,Japan,35,2,No module named 'google.generativeai',-1,-1,-1,-1,-1,-1,-1
+4,Japan,55,1,No module named 'google.generativeai',-1,-1,-1,-1,-1,-1,-1

@@ -1,0 +1,129 @@
+{
+  "homosexuality": {
+    "mean": 5.09,
+    "std": 3.0354637873050643,
+    "count": 100,
+    "distribution": {
+      "4": 11,
+      "7": 14,
+      "1": 19,
+      "2": 5,
+      "3": 16,
+      "9": 17,
+      "8": 9,
+      "10": 3,
+      "5": 1,
+      "6": 5
+    },
+    "invalid_count": 0,
+    "topic": "homosexuality"
+  },
+  "abortion": {
+    "mean": 4.64,
+    "std": 2.626669743114642,
+    "count": 100,
+    "distribution": {
+      "2": 25,
+      "3": 16,
+      "7": 17,
+      "1": 7,
+      "5": 2,
+      "4": 6,
+      "9": 6,
+      "8": 13,
+      "6": 8
+    },
+    "invalid_count": 0,
+    "topic": "abortion"
+  },
+  "divorce": {
+    "mean": 6.91,
+    "std": 2.1324572064577842,
+    "count": 100,
+    "distribution": {
+      "6": 8,
+      "9": 25,
+      "3": 5,
+      "4": 17,
+      "8": 25,
+      "5": 2,
+      "7": 13,
+      "2": 2,
+      "10": 3
+    },
+    "invalid_count": 0,
+    "topic": "divorce"
+  },
+  "suicide": {
+    "mean": 2.45,
+    "std": 1.7716909687891083,
+    "count": 100,
+    "distribution": {
+      "1": 43,
+      "6": 6,
+      "2": 19,
+      "7": 5,
+      "4": 8,
+      "3": 17,
+      "5": 2
+    },
+    "invalid_count": 0,
+    "topic": "suicide"
+  },
+  "euthanasia": {
+    "mean": 4.64,
+    "std": 2.8551565967419705,
+    "count": 100,
+    "distribution": {
+      "2": 25,
+      "8": 15,
+      "1": 15,
+      "3": 5,
+      "4": 5,
+      "6": 7,
+      "7": 15,
+      "9": 8,
+      "5": 5
+    },
+    "invalid_count": 0,
+    "topic": "euthanasia"
+  },
+  "prostitution": {
+    "mean": 4.61,
+    "std": 3.084320071430704,
+    "count": 100,
+    "distribution": {
+      "1": 26,
+      "2": 12,
+      "8": 8,
+      "7": 12,
+      "6": 7,
+      "3": 6,
+      "9": 14,
+      "4": 8,
+      "5": 5,
+      "10": 2
+    },
+    "invalid_count": 0,
+    "topic": "prostitution"
+  },
+  "death_penalty": {
+    "mean": 5.24,
+    "std": 3.244638156663508,
+    "count": 100,
+    "distribution": {
+      "5": 2,
+      "7": 8,
+      "8": 22,
+      "3": 7,
+      "9": 19,
+      "1": 20,
+      "2": 15,
+      "6": 3,
+      "4": 3,
+      "10": 1
+    },
+    "invalid_count": 0,
+    "topic": "death_penalty"
+  }
+}
