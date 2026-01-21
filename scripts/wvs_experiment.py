@@ -1,6 +1,11 @@
 """
 WVS 윤리 이슈 실험 메인 스크립트
 여러 LLM 모델을 사용하여 국가별 윤리 가치관 조사 시뮬레이션
+
+변경사항:
+- agent.py → persona.py로 변경
+- WVS 실제 분포 기반 페르소나 생성기 사용
+- 페르소나-응답 일관성 검증 기능 추가
 """
 import json
 import csv
@@ -8,8 +13,9 @@ import os
 import re
 import sys
 import time
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from collections import defaultdict
+from dataclasses import asdict
 
 # 프로젝트 루트 경로 설정
 current_file = os.path.abspath(__file__)
@@ -23,9 +29,13 @@ else:
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-# 모듈 import
-from agent.agent import WVSPersonaGenerator, StatelessPersonaAgent, WVSEthicalQuestions
-from llm.llm import Message, chat_request
+# 모듈 import (agent → persona로 변경)
+from persona.persona import (
+    WVSPersonaGenerator, 
+    WVSPersonaProfile,
+    PersonaResponseValidator
+)
+from llm.llm import Message, chat_request, get_chat_request_func
 
 # 실험 설정
 COUNTRIES = ["United States", "Germany", "Great Britain", "Japan", "South Korea", "India", "Netherlands"]
@@ -44,6 +54,94 @@ COUNTRY_CODES = {
 ETHICAL_TOPICS = ["homosexuality", "abortion", "divorce", "suicide", "euthanasia", "prostitution", "death_penalty"]
 
 
+# =============================================================================
+# WVS 윤리 질문 클래스
+# =============================================================================
+
+class WVSEthicalQuestions:
+    """WVS 윤리적 이슈 질문"""
+    
+    TOPICS = {
+        "homosexuality": "Homosexuality",
+        "abortion": "Abortion",
+        "divorce": "Divorce",
+        "suicide": "Suicide",
+        "euthanasia": "Euthanasia (ending the life of the incurably sick)",
+        "prostitution": "Prostitution",
+        "death_penalty": "Death penalty"
+    }
+    
+    @classmethod
+    def get_single_turn_questions(cls, return_number_only: bool = True) -> str:
+        """
+        모든 윤리 질문을 한 번에 제시하는 프롬프트 생성
+        
+        Args:
+            return_number_only: True면 숫자만 요청, False면 reasoning도 요청
+        """
+        topic_list = "\n".join([
+            f"{i}. {cls.TOPICS[topic]}" 
+            for i, topic in enumerate(ETHICAL_TOPICS, 1)
+        ])
+        
+        if return_number_only:
+            return f"""Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between.
+
+Use a scale from 1 to 10, where:
+- 1 means "Never justifiable"
+- 10 means "Always justifiable"
+
+Rate each topic based on YOUR personal values and beliefs as described in your profile:
+
+{topic_list}
+
+IMPORTANT: Respond with ONLY the topic name and number for each, in this exact format:
+1. homosexuality: [your rating]
+2. abortion: [your rating]
+3. divorce: [your rating]
+4. suicide: [your rating]
+5. euthanasia: [your rating]
+6. prostitution: [your rating]
+7. death_penalty: [your rating]
+
+Do not include any explanation or reasoning. Just the ratings."""
+        else:
+            return f"""Please tell me for each of the following statements whether you think it can always be justified, never be justified, or something in between.
+
+Use a scale from 1 to 10, where:
+- 1 means "Never justifiable"
+- 10 means "Always justifiable"
+
+Rate each topic based on YOUR personal values and beliefs:
+
+{topic_list}
+
+For each topic, briefly explain your reasoning and then give your rating."""
+
+
+# =============================================================================
+# Stateless 페르소나 에이전트
+# =============================================================================
+
+class StatelessPersonaAgent:
+    """
+    상태를 유지하지 않는 페르소나 에이전트
+    각 요청마다 페르소나 프로필을 시스템 프롬프트로 전달
+    """
+    
+    def __init__(self, persona: WVSPersonaProfile, temp: float = 0.3):
+        self.persona = persona
+        self.temp = temp
+    
+    def get_system_prompt(self) -> str:
+        """시스템 프롬프트 반환"""
+        return self.persona.to_prompt()
+
+
+# =============================================================================
+# 파싱 함수
+# =============================================================================
+
 def parse_rating_from_response_advanced(response: str, topic: str, topic_index: int, debug: bool = False) -> int:
     """
     개선된 평점 파싱 - 더 많은 패턴 지원
@@ -60,7 +158,7 @@ def parse_rating_from_response_advanced(response: str, topic: str, topic_index: 
     # 응답을 줄 단위로 분리
     lines = response.strip().split('\n')
     
-    # 🆕 더욱 강력한 패턴 리스트 (우선순위 순)
+    # 더욱 강력한 패턴 리스트 (우선순위 순)
     patterns = [
         # 1. "1. homosexuality: 7" 형태 (가장 일반적)
         rf"^\s*{topic_index}[\.\)]\s*{topic}\s*[:=\-–]\s*(\d+)",
@@ -93,7 +191,7 @@ def parse_rating_from_response_advanced(response: str, topic: str, topic_index: 
                         print(f"✓ Matched '{topic}' with pattern '{pattern}' in line: '{line_clean[:80]}'")
                     return rating
     
-    # 🆕 전체 응답에서 주제별로 검색 (콤마 구분 등)
+    # 전체 응답에서 주제별로 검색 (콤마 구분 등)
     # "homosexuality: 6, abortion: 7" 같은 경우
     global_pattern = rf"\b{topic}\b\s*[:=\-–]\s*(\d+)"
     global_match = re.search(global_pattern, response, re.IGNORECASE)
@@ -104,7 +202,7 @@ def parse_rating_from_response_advanced(response: str, topic: str, topic_index: 
                 print(f"✓ Matched '{topic}' globally")
             return rating
     
-    # 🆕 번호 기반 검색 (주제명이 없는 경우 대비)
+    # 번호 기반 검색 (주제명이 없는 경우 대비)
     # "3: 8" 또는 "3. 8" 형태 찾기
     number_pattern = rf"^\s*{topic_index}[\.\):\s]+(\d+)\s*$"
     for line in lines:
@@ -148,22 +246,39 @@ def calculate_distribution_stats(ratings: List[int]) -> Dict:
     }
 
 
+# =============================================================================
+# 메인 실험 함수
+# =============================================================================
+
 def run_single_turn_experiment(
     country: str,
     num_personas: int = 100,
-    random_seed: int = 42,
     temp: float = 0.3,
     max_tokens: int = 500,
     model: str = None,
-    debug: bool = False  # 🆕 디버그 모드
+    debug: bool = False,
+    validate_consistency: bool = True  # 일관성 검증 여부
 ) -> Tuple[List[Dict], Dict]:
     """
     Single turn 방식으로 모든 윤리 질문에 한번에 응답 (숫자만)
+    
+    Args:
+        country: 국가명
+        num_personas: 생성할 페르소나 수
+        temp: LLM 온도
+        max_tokens: 최대 토큰 수
+        model: 사용할 모델
+        debug: 디버그 모드
+        validate_consistency: 페르소나-응답 일관성 검증 여부
+    
+    Returns:
+        (응답 데이터 리스트, 통계 딕셔너리)
     """
     print(f"\n{'='*60}")
     print(f"Running SINGLE TURN experiment: {country}")
-    print(f"Random seed: {random_seed}, Temperature: {temp}")
+    print(f"Temperature: {temp}")
     print(f"Model: {model or 'default'}")
+    print(f"Consistency validation: {'ON' if validate_consistency else 'OFF'}")
     print(f"{'='*60}\n")
     
     # 페르소나 생성 (국가명 → 국가 코드 변환)
@@ -171,12 +286,16 @@ def run_single_turn_experiment(
     if not country_code:
         raise ValueError(f"Unknown country: {country}")
     
-    generator = WVSPersonaGenerator(country_code=country_code, seed=random_seed)
+    # 새로운 WVS 실제 분포 기반 생성기 사용 (seed 제거됨)
+    generator = WVSPersonaGenerator(country_code=country_code)
     personas = generator.generate_multiple_personas(n=num_personas)
     
     print(f"✅ Generated {len(personas)} personas for {country} (Code: {country_code})")
-    print(f"   Example persona: Age={personas[0].age}, Gender={personas[0].gender}, Education={personas[0].education_level}")
-    print(f"   Random seed: {random_seed} (for reproducibility)\n")
+    print(f"   Example persona: Age={personas[0].age}, Gender={'Male' if personas[0].gender == 1 else 'Female'}, Education={personas[0].education_level}")
+    print(f"   Political L-R: {personas[0].political_left_right}/10, Religiosity: {personas[0].religiosity}\n")
+    
+    # 일관성 검증기 초기화
+    validator = PersonaResponseValidator(use_llm=False) if validate_consistency else None
     
     # 모든 질문을 single turn 형식으로 (숫자만 요청 - reasoning 제외)
     all_questions = WVSEthicalQuestions.get_single_turn_questions(return_number_only=True)
@@ -184,15 +303,18 @@ def run_single_turn_experiment(
     responses_data = []
     topic_ratings = {topic: [] for topic in ETHICAL_TOPICS}
     
-    # 🆕 파싱 실패 추적
+    # 파싱 실패 추적
     parsing_failures = {topic: 0 for topic in ETHICAL_TOPICS}
+    
+    # 일관성 점수 추적
+    consistency_scores = []
     
     for i, persona in enumerate(personas):
         agent = StatelessPersonaAgent(persona=persona, temp=temp)
         
         try:
             # 시스템 프롬프트
-            system_message_content = agent.persona.to_prompt()
+            system_message_content = agent.get_system_prompt()
             
             # 질문 메시지
             messages = [
@@ -204,13 +326,13 @@ def run_single_turn_experiment(
             response = chat_request(
                 messages=messages,
                 temperature=temp,
-                max_tokens=1000,  # 🆕 500 → 1000으로 증가
+                max_tokens=1000,
                 model=model
             )
             
             response_text = response.content
             
-            # 🔥 디버그 모드: 첫 5개 응답 출력
+            # 디버그 모드: 첫 5개 응답 출력
             if debug and i < 5:
                 print(f"\n{'='*60}")
                 print(f"DEBUG: Persona {i} Response (FULL):")
@@ -220,11 +342,10 @@ def run_single_turn_experiment(
                 print(f"Response length: {len(response_text)} characters")
                 print(f"{'='*60}\n")
             
-            # 🔥 Rate limit 방지를 위한 대기 (보수적 설정)
-            # 안전하게 5초 간격 사용 (RPM: 60/min = 12/min, RPM 제한 1000의 1.2%만 사용)
-            time.sleep(5.0)
+            # Rate limit 방지를 위한 대기
+            time.sleep(3.0)
             
-            # 각 주제별 평점 추출 (개선된 파싱)
+            # 응답 파싱
             ratings_dict = {}
             for j, topic in enumerate(ETHICAL_TOPICS, 1):
                 rating = parse_rating_from_response_advanced(response_text, topic, j, debug=debug)
@@ -235,47 +356,64 @@ def run_single_turn_experiment(
                 else:
                     ratings_dict[topic] = -1
                     parsing_failures[topic] += 1
-                    
-                    # 🆕 파싱 실패 경고 (처음 3번만)
-                    if parsing_failures[topic] <= 3:
-                        print(f"⚠️  Parsing failed for persona {i}, topic '{topic}'")
-                        print(f"   Response snippet: {response_text[:200]}...")
             
+            # 일관성 검증 (선택적)
+            consistency_result = None
+            if validator:
+                # 응답을 검증 가능한 형식으로 변환
+                validation_responses = {}
+                if ratings_dict.get("homosexuality", -1) > 0:
+                    validation_responses["homosexual_justifiable"] = ratings_dict["homosexuality"]
+                if ratings_dict.get("prostitution", -1) > 0:
+                    validation_responses["casual_sex_justifiable"] = ratings_dict["prostitution"]
+                
+                if validation_responses:
+                    consistency_result = validator.validate_response_consistency(persona, validation_responses)
+                    consistency_scores.append(consistency_result["score"])
+                    
+                    if debug and not consistency_result["is_consistent"]:
+                        print(f"⚠️  Persona {i} inconsistency detected:")
+                        print(f"   {consistency_result['details']}")
+            
+            # 결과 저장
             persona_dict = {
                 "persona_id": i,
                 "country": country,
+                "country_code": country_code,
                 "age": persona.age,
                 "gender": persona.gender,
                 "education_level": persona.education_level,
                 "social_class": persona.social_class,
+                "marital_status": persona.marital_status,
+                "born_in_country": persona.born_in_country,
+                "is_citizen": persona.is_citizen,
                 "political_left_right": persona.political_left_right,
                 "importance_religion": persona.importance_religion,
+                "importance_god": persona.importance_god,
                 "religiosity": persona.religiosity,
+                "religious_service_attendance": persona.religious_service_attendance,
+                "reject_homosexual_neighbor": persona.reject_homosexual_neighbor,
+                "homosexual_parents_opinion": persona.homosexual_parents_opinion,
                 "response": response_text,
                 "temperature": temp,
-                "random_seed": random_seed,
                 "model": model or "default",
+                "consistency_score": consistency_result["score"] if consistency_result else None,
+                "is_consistent": consistency_result["is_consistent"] if consistency_result else None,
                 **{f"rating_{topic}": ratings_dict.get(topic, -1) for topic in ETHICAL_TOPICS}
             }
-            
             responses_data.append(persona_dict)
             
             if (i + 1) % 10 == 0:
-                print(f"✅ Processed {i+1}/{num_personas} personas")
-                
-                # 🆕 중간 통계 출력
-                if debug:
-                    for topic in ETHICAL_TOPICS:
-                        success_rate = (len(topic_ratings[topic]) / (i+1)) * 100
-                        print(f"   {topic:15s}: {len(topic_ratings[topic]):3d} / {i+1:3d} ({success_rate:.1f}%)")
+                avg_consistency = sum(consistency_scores[-10:]) / len(consistency_scores[-10:]) if consistency_scores else 0
+                print(f"Processed {i+1}/{num_personas} personas... (Avg consistency: {avg_consistency:.2f})")
         
         except Exception as e:
             error_str = str(e)
             print(f"❌ Error processing persona {i}: {error_str[:100]}")
             
-            # 🔥 강력한 Retry 로직 - 어떤 에러든 재시도
+            # Retry 로직
             print(f"⚠️  Will retry persona {i} after waiting...")
-            time.sleep(10)  # 10초 대기
+            time.sleep(10)
             
             try:
                 messages = [
@@ -291,7 +429,7 @@ def run_single_turn_experiment(
                 )
                 
                 response_text = response.content
-                time.sleep(5.0)  # retry 후에도 충분한 대기
+                time.sleep(5.0)
                 
                 ratings_dict = {}
                 for j, topic in enumerate(ETHICAL_TOPICS, 1):
@@ -306,6 +444,7 @@ def run_single_turn_experiment(
                 persona_dict = {
                     "persona_id": i,
                     "country": country,
+                    "country_code": country_code,
                     "age": persona.age,
                     "gender": persona.gender,
                     "education_level": persona.education_level,
@@ -315,7 +454,6 @@ def run_single_turn_experiment(
                     "religiosity": persona.religiosity,
                     "response": response_text,
                     "temperature": temp,
-                    "random_seed": random_seed,
                     "model": model or "default",
                     **{f"rating_{topic}": ratings_dict.get(topic, -1) for topic in ETHICAL_TOPICS}
                 }
@@ -345,9 +483,25 @@ def run_single_turn_experiment(
         stats["topic"] = topic
         all_stats[topic] = stats
         
-        # 🆕 파싱 성공률 표시
+        # 파싱 성공률 표시
         success_rate = (stats['count'] / num_personas) * 100
         print(f"{topic:15s}: Mean={stats['mean']:.2f}, Std={stats['std']:.2f}, N={stats['count']}/{num_personas} ({success_rate:.1f}%)")
+    
+    # 일관성 통계
+    if consistency_scores:
+        avg_consistency = sum(consistency_scores) / len(consistency_scores)
+        consistent_count = sum(1 for s in consistency_scores if s >= 0.7)
+        print(f"\n{'='*60}")
+        print("CONSISTENCY SUMMARY")
+        print(f"{'='*60}")
+        print(f"Average consistency score: {avg_consistency:.3f}")
+        print(f"Consistent responses: {consistent_count}/{len(consistency_scores)} ({consistent_count/len(consistency_scores)*100:.1f}%)")
+        
+        all_stats["_consistency"] = {
+            "average_score": avg_consistency,
+            "consistent_count": consistent_count,
+            "total_validated": len(consistency_scores)
+        }
     
     return responses_data, all_stats
 
@@ -365,11 +519,11 @@ if __name__ == '__main__':
     parser.add_argument('--num-personas', type=int, default=100,
                        help='생성할 페르소나 수 (기본값: 100)')
     parser.add_argument('--temperature', type=float, default=0.3,
-                       help='LLM 온도 (기본값: 1.0)')
-    parser.add_argument('--seed', type=int, default=42,
-                       help='랜덤 시드 (기본값: 42)')
+                       help='LLM 온도 (기본값: 0.3)')
     parser.add_argument('--debug', action='store_true',
                        help='디버그 모드 활성화 (상세 로그 출력)')
+    parser.add_argument('--no-validation', action='store_true',
+                       help='일관성 검증 비활성화')
     
     args = parser.parse_args()
     
@@ -432,8 +586,8 @@ if __name__ == '__main__':
     print(f"🤖 Model: {args.model} (saved as: {model_short})")
     print(f"👥 Personas per country: {args.num_personas}")
     print(f"🌡️  Temperature: {args.temperature}")
-    print(f"🎲 Random Seed: {args.seed}")
     print(f"📁 Output: {output_dir}")
+    print(f"✅ Consistency validation: {'OFF' if args.no_validation else 'ON'}")
     if args.debug:
         print(f"🐛 Debug mode: ENABLED")
     print(f"{'='*70}\n")
@@ -448,18 +602,18 @@ if __name__ == '__main__':
             responses, all_stats = run_single_turn_experiment(
                 country=country,
                 num_personas=args.num_personas,
-                random_seed=args.seed,
                 temp=args.temperature,
                 max_tokens=500,
                 model=args.model,
-                debug=args.debug  # 🆕
+                debug=args.debug,
+                validate_consistency=not args.no_validation
             )
             
             # 결과 저장
             country_safe = country.replace(' ', '_')
             
             # CSV 저장
-            responses_filename = f"responses_{country_safe}_seed{args.seed}.csv"
+            responses_filename = f"responses_{country_safe}.csv"
             responses_path = os.path.join(output_dir, responses_filename)
             
             with open(responses_path, 'w', newline='', encoding='utf-8') as f:
@@ -469,7 +623,7 @@ if __name__ == '__main__':
                     writer.writerows(responses)
             
             # JSON 저장
-            stats_filename = f"stats_{country_safe}_seed{args.seed}.json"
+            stats_filename = f"stats_{country_safe}.json"
             stats_path = os.path.join(output_dir, stats_filename)
             
             with open(stats_path, 'w', encoding='utf-8') as f:

@@ -2,7 +2,7 @@
 LLM API 통신 모듈
 OpenAI API, Gemini API, Llama (Groq/Ollama/Together) 또는 로컬 서버와 통신
 """
-from typing import List, Optional
+from typing import List, Optional, Dict, Any, Callable
 import json
 import requests
 import numpy as np
@@ -174,6 +174,7 @@ def chat_request(
     else:
         return _chat_request_local(messages, max_tokens, temperature)
 
+
 def _chat_request_gemini(
     messages: List[Message],
     max_tokens: int,
@@ -237,45 +238,18 @@ def _chat_request_gemini(
     if len(conversation_messages) == 0:
         raise ValueError("At least one user message required for Gemini API")
     
-    if conversation_messages[-1]["role"] != "user":
-        raise ValueError("Last message must be from user for Gemini API")
+    # 마지막 메시지를 제외한 나머지로 chat 생성
+    chat = model_instance.start_chat(history=conversation_messages[:-1])
     
-    history = conversation_messages[:-1] if len(conversation_messages) > 1 else []
-    chat = model_instance.start_chat(history=history)
+    # 마지막 메시지로 응답 생성
+    last_message = conversation_messages[-1]["parts"][0]["text"]
+    response = chat.send_message(last_message)
     
-    last_user_message = conversation_messages[-1]["parts"][0]["text"]
-    
-    # 🔥 응답 생성 시 추가 설정
-    response = chat.send_message(
-        last_user_message,
-        safety_settings=safety_settings  # 한 번 더 명시
-    )
-    
-    # 🔥 디버그: finish_reason과 safety_ratings 확인
-    if hasattr(response, 'candidates') and len(response.candidates) > 0:
-        candidate = response.candidates[0]
-        finish_reason = candidate.finish_reason
-        
-        # finish_reason 로깅
-        if finish_reason != 1:  # 1 = STOP (정상 완료)
-            print(f"⚠️  WARNING: Gemini finish_reason = {finish_reason}")
-            print(f"   0=FINISH_REASON_UNSPECIFIED, 1=STOP, 2=MAX_TOKENS, 3=SAFETY, 4=RECITATION, 5=OTHER")
-            
-        # safety_ratings 로깅
-        if hasattr(candidate, 'safety_ratings'):
-            for rating in candidate.safety_ratings:
-                if rating.probability not in [1]:  # 1 = NEGLIGIBLE
-                    print(f"⚠️  Safety issue: {rating.category} = {rating.probability}")
-    
-    # 🔥 응답이 안전 필터에 의해 차단되었는지 확인
-    if not response.text:
-        print(f"⚠️  WARNING: Empty response from Gemini")
-        print(f"   Prompt feedback: {response.prompt_feedback}")
-        print(f"   Candidates: {response.candidates}")
-        raise Exception("Gemini returned empty response - possibly blocked by safety filter")
+    answer = response.text
     
     time = int(np.max([message.time for message in messages]) + 1)
-    return Message(time=time, content=response.text, role='assistant')
+    return Message(time=time, content=answer, role='assistant')
+
 
 def _chat_request_openai_compatible(
     messages: List[Message],
@@ -283,80 +257,91 @@ def _chat_request_openai_compatible(
     temperature: float,
     model: str
 ) -> Message:
-    """OpenAI 호환 API 요청 (OpenAI, Groq, Together 등)"""
+    """OpenAI 호환 API 요청 (OpenAI, Groq, Together)"""
+    import re
+    
+    # 모델명에 따라 적절한 API URL과 헤더 선택
+    model_lower = model.lower()
+    
+    if 'gpt' in model_lower:
+        # OpenAI
+        api_url = 'https://api.openai.com/v1'
+        request_headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {OPENAI_API_KEY}'
+        }
+    elif GROQ_API_KEY and ('versatile' in model_lower or 'instant' in model_lower or 'llama' in model_lower):
+        # Groq
+        api_url = 'https://api.groq.com/openai/v1'
+        request_headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {GROQ_API_KEY}'
+        }
+    elif TOGETHER_API_KEY and 'meta-llama' in model_lower:
+        # Together AI
+        api_url = 'https://api.together.xyz/v1'
+        request_headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {TOGETHER_API_KEY}'
+        }
+    else:
+        # 기본값: 현재 설정된 API 사용
+        api_url = API_URL
+        request_headers = headers
+    
     request_body = {
         "model": model,
         "messages": [message.to_chat_completion_query() for message in messages],
-        "temperature": temperature
+        "temperature": temperature,
     }
     
     if max_tokens > 0:
         request_body["max_tokens"] = max_tokens
     
-    # 🔥 매우 강력한 Rate limit 처리 (오래 걸려도 안전하게)
-    max_retries = 30  # 10 → 30으로 대폭 증가
-    base_wait_time = 10.0  # 기본 10초 대기
+    # Retry 로직 (Rate limit 처리)
+    max_retries = 5
+    base_wait_time = 10.0
     
     for attempt in range(max_retries):
         try:
             response = requests.post(
-                f'{API_URL}/chat/completions',
-                headers=headers,
+                f'{api_url}/chat/completions',
+                headers=request_headers,
                 json=request_body,
-                timeout=60  # 60초 타임아웃 추가
+                timeout=120
             )
             
-            # Rate limit (429) 에러 처리
+            # Rate limit 에러 (429)
             if response.status_code == 429:
                 if attempt < max_retries - 1:
-                    # 🔥 헤더에서 retry-after 우선 확인
-                    retry_after_header = response.headers.get('retry-after')
-                    if retry_after_header:
-                        try:
-                            wait_time = float(retry_after_header) + 2.0  # 헤더 시간 + 2초 여유
-                            print(f"📊 retry-after header: {retry_after_header}s, will wait {wait_time:.1f}s")
-                        except ValueError:
-                            wait_time = base_wait_time
-                    else:
-                        # 헤더에 없으면 에러 메시지에서 추출
-                        try:
-                            error_data = response.json()
-                            wait_time = base_wait_time  # 기본값
-                            
-                            # 🔥 디버그: 에러 메시지 전체 출력
-                            error_msg = error_data.get('error', {}).get('message', 'No message')
-                            print(f"🔍 Rate limit error: {error_msg[:300]}")
-                            
-                            if 'error' in error_data and 'message' in error_data['error']:
-                                import re
-                                message = error_data['error']['message']
-                                
-                                # 여러 패턴 시도
-                                patterns = [
-                                    r'try again in ([\d.]+)s',           # "try again in 2.1s"
-                                    r'try again in ([\d.]+) seconds',   # "try again in 2.1 seconds"
-                                    r'Please wait ([\d.]+)s',           # "Please wait 2.1s"
-                                    r'wait ([\d.]+) seconds',           # "wait 2.1 seconds"
-                                ]
-                                
-                                for pattern in patterns:
-                                    match = re.search(pattern, message, re.IGNORECASE)
-                                    if match:
-                                        suggested_wait = float(match.group(1))
-                                        # 제안된 시간 + 2초 여유 (2배는 너무 김)
-                                        wait_time = suggested_wait + 2.0
-                                        print(f"📊 API suggests {suggested_wait:.1f}s, will wait {wait_time:.1f}s")
-                                        break
-                                else:
-                                    # 패턴 매칭 실패 시
-                                    wait_time = base_wait_time
-                                    print(f"⚠️  Could not parse wait time from message, using base: {wait_time:.1f}s")
-                        except Exception as parse_error:
-                            # JSON 파싱 실패 시
-                            wait_time = base_wait_time
-                            print(f"⚠️  Error parsing response ({parse_error}), using base: {wait_time:.1f}s")
+                    # 응답에서 대기 시간 추출 시도
+                    wait_time = base_wait_time * (2 ** attempt)
                     
-                    # 최소 2초, 최대 120초
+                    try:
+                        error_data = response.json()
+                        message = error_data.get('error', {}).get('message', '')
+                        
+                        # "try again in X.XXs" 패턴 찾기
+                        patterns = [
+                            r'try again in (\d+\.?\d*)s',
+                            r'Please retry after (\d+\.?\d*) second',
+                            r'wait (\d+\.?\d*) second'
+                        ]
+                        
+                        for pattern in patterns:
+                            match = re.search(pattern, message, re.IGNORECASE)
+                            if match:
+                                suggested_wait = float(match.group(1))
+                                wait_time = suggested_wait + 2.0
+                                print(f"📊 API suggests {suggested_wait:.1f}s, will wait {wait_time:.1f}s")
+                                break
+                        else:
+                            wait_time = base_wait_time
+                            print(f"⚠️  Could not parse wait time from message, using base: {wait_time:.1f}s")
+                    except Exception as parse_error:
+                        wait_time = base_wait_time
+                        print(f"⚠️  Error parsing response ({parse_error}), using base: {wait_time:.1f}s")
+                    
                     wait_time = max(2.0, min(wait_time, 120.0))
                     
                     print(f"⏳ Rate limit hit. Waiting {wait_time:.1f}s... (attempt {attempt+1}/{max_retries})")
@@ -541,7 +526,10 @@ def complete_request(
     return Message(time=time, content=answer, role=role), logprobs_data
 
 
+# =============================================================================
 # 편의 함수들
+# =============================================================================
+
 def create_system_message(content: str) -> Message:
     """시스템 메시지 생성"""
     return Message(time=0, content=content, role="system")
@@ -555,6 +543,28 @@ def create_user_message(content: str, time: int = 1) -> Message:
 def create_assistant_message(content: str, time: int) -> Message:
     """어시스턴트 메시지 생성"""
     return Message(time=time, content=content, role="assistant")
+
+
+def get_chat_request_func() -> Callable:
+    """
+    PersonaResponseValidator에서 사용할 수 있는 chat_request 래퍼 함수 반환
+    
+    Returns:
+        chat_request 호환 함수
+    """
+    def wrapped_chat_request(messages: List[Dict], temperature: float = 0.3, model: str = None):
+        """딕셔너리 형식의 메시지를 Message 객체로 변환하여 호출"""
+        msg_objects = []
+        for i, msg in enumerate(messages):
+            msg_objects.append(Message(
+                time=i,
+                content=msg.get("content", ""),
+                role=msg.get("role", "user")
+            ))
+        
+        return chat_request(msg_objects, temperature=temperature, model=model)
+    
+    return wrapped_chat_request
 
 
 if __name__ == "__main__":
