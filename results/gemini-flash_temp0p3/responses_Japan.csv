@@ -1,0 +1,22 @@
+persona_id,country,age,gender,education_level,social_class,political_left_right,importance_religion,religiosity,response,temperature,model,rating_homosexuality,rating_abortion,rating_divorce,rating_suicide,rating_euthanasia,rating_prostitution,rating_death_penalty
+0,Japan,30,2,2,2,7,3,2,"1. homosexuality: 10
+2. abortion: 7
+3. divorce: 8
+4. suicide: 2
+5. euthanasia: 5
+6. paid_intimate_services: 1
+7. capital_punishment: 8",0.3,gemini-2.5-flash,10,7,8,2,5,1,8
+1,Japan,90,1,3,4,5,4,2,"1. homosexuality: 2
+2. abortion: 7
+3. divorce: 8
+4. suicide: 4
+5. euthanasia: 7
+6. paid_intimate_services: 6
+7. capital_punishment: 9",0.3,gemini-2.5-flash,2,7,8,4,7,6,9
+2,Japan,60,2,3,3,6,4,3,"1. homosexuality: 9
+2. abortion: 9
+3. divorce: 8
+4. suicide: 2
+5. euthanasia: 7
+6. paid_intimate_services: 1
+7. capital_punishment: 7",0.3,gemini-2.5-flash,9,9,8,2,7,1,7

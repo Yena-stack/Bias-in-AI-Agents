@@ -1,0 +1,22 @@
+persona_id,country,age,gender,education_level,social_class,political_left_right,importance_religion,religiosity,response,temperature,model,rating_homosexuality,rating_abortion,rating_divorce,rating_suicide,rating_euthanasia,rating_prostitution,rating_death_penalty
+0,Germany,83,2,3,4,3,2,2,"1. homosexuality: 10
+2. abortion: 9
+3. divorce: 9
+4. suicide: 3
+5. euthanasia: 9
+6. paid_intimate_services: 1
+7. capital_punishment: 1",0.3,gemini-2.5-flash,10,9,9,3,9,1,1
+1,Germany,65,2,2,2,4,4,1,"1. homosexuality: 7
+2. abortion: 8
+3. divorce: 8
+4. suicide: 2
+5. euthanasia: 8
+6. paid_intimate_services: 6
+7. capital_punishment: 1",0.3,gemini-2.5-flash,7,8,8,2,8,6,1
+2,Germany,36,1,2,3,5,3,1,"1. homosexuality: 10
+2. abortion: 9
+3. divorce: 9
+4. suicide: 5
+5. euthanasia: 9
+6. paid_intimate_services: 10
+7. capital_punishment: 1",0.3,gemini-2.5-flash,10,9,9,5,9,10,1

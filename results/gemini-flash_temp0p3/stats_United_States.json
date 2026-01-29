@@ -1,0 +1,80 @@
+{
+  "homosexuality": {
+    "mean": 9.333333333333334,
+    "std": 0.5773502691896257,
+    "count": 3,
+    "distribution": {
+      "10": 1,
+      "9": 2
+    },
+    "invalid_count": 0,
+    "topic": "homosexuality"
+  },
+  "abortion": {
+    "mean": 7.666666666666667,
+    "std": 0.5773502691896257,
+    "count": 3,
+    "distribution": {
+      "8": 2,
+      "7": 1
+    },
+    "invalid_count": 0,
+    "topic": "abortion"
+  },
+  "divorce": {
+    "mean": 8,
+    "std": 0.0,
+    "count": 3,
+    "distribution": {
+      "8": 3
+    },
+    "invalid_count": 0,
+    "topic": "divorce"
+  },
+  "suicide": {
+    "mean": 2,
+    "std": 0.0,
+    "count": 3,
+    "distribution": {
+      "2": 3
+    },
+    "invalid_count": 0,
+    "topic": "suicide"
+  },
+  "euthanasia": {
+    "mean": 7,
+    "std": 1.0,
+    "count": 3,
+    "distribution": {
+      "8": 1,
+      "7": 1,
+      "6": 1
+    },
+    "invalid_count": 0,
+    "topic": "euthanasia"
+  },
+  "prostitution": {
+    "mean": 4.666666666666667,
+    "std": 4.041451884327381,
+    "count": 3,
+    "distribution": {
+      "4": 1,
+      "1": 1,
+      "9": 1
+    },
+    "invalid_count": 0,
+    "topic": "prostitution"
+  },
+  "death_penalty": {
+    "mean": 3.6666666666666665,
+    "std": 1.5275252316519468,
+    "count": 3,
+    "distribution": {
+      "4": 1,
+      "2": 1,
+      "5": 1
+    },
+    "invalid_count": 0,
+    "topic": "death_penalty"
+  }
+}

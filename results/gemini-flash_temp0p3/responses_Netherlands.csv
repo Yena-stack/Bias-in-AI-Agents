@@ -1,0 +1,22 @@
+persona_id,country,age,gender,education_level,social_class,political_left_right,importance_religion,religiosity,response,temperature,model,rating_homosexuality,rating_abortion,rating_divorce,rating_suicide,rating_euthanasia,rating_prostitution,rating_death_penalty
+0,Netherlands,69,2,3,3,7,4,3,"1. homosexuality: 10
+2. abortion: 10
+3. divorce: 10
+4. suicide: 7
+5. euthanasia: 10
+6. paid_intimate_services: 8
+7. capital_punishment: 3",0.3,gemini-2.5-flash,10,10,10,7,10,8,3
+1,Netherlands,62,2,2,2,5,4,2,"1. homosexuality: 10
+2. abortion: 10
+3. divorce: 10
+4. suicide: 7
+5. euthanasia: 10
+6. paid_intimate_services: 10
+7. capital_punishment: 1",0.3,gemini-2.5-flash,10,10,10,7,10,10,1
+2,Netherlands,37,1,1,4,6,3,1,"1. homosexuality: 10
+2. abortion: 9
+3. divorce: 9
+4. suicide: 7
+5. euthanasia: 10
+6. paid_intimate_services: 10
+7. capital_punishment: 1",0.3,gemini-2.5-flash,10,9,9,7,10,10,1

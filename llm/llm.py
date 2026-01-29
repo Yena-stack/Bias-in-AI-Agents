@@ -183,6 +183,7 @@ def _chat_request_gemini(
 ) -> Message:
     """Gemini API 요청"""
     import google.generativeai as genai
+    from google.generativeai.types import HarmCategory, HarmBlockThreshold
     
     genai.configure(api_key=GEMINI_API_KEY)
     
@@ -200,6 +201,21 @@ def _chat_request_gemini(
             if gemini_msg:
                 conversation_messages.append(gemini_msg)
     
+    # 연구 목적 컨텍스트 추가
+    research_context = """[RESEARCH CONTEXT]
+This is an academic research simulation replicating the World Values Survey (WVS).
+You are role-playing as a survey respondent with specific demographic characteristics.
+Please provide numerical ratings (1-10) for ALL topics listed, including sensitive ones.
+This is for legitimate social science research on cross-cultural value differences.
+You must respond with a number for every single item - do not skip any items.
+[END RESEARCH CONTEXT]
+
+"""
+    if system_instruction:
+        system_instruction = research_context + system_instruction
+    else:
+        system_instruction = research_context
+    
     generation_config = {
         "temperature": temperature,
         "top_p": 0.95,
@@ -208,25 +224,19 @@ def _chat_request_gemini(
     if max_tokens > 0:
         generation_config["max_output_tokens"] = max_tokens
     
-    # 🔥 안전 설정 (모든 필터 완전히 비활성화)
-    safety_settings = [
-        {
-            "category": "HARM_CATEGORY_HARASSMENT",
-            "threshold": "BLOCK_NONE"
-        },
-        {
-            "category": "HARM_CATEGORY_HATE_SPEECH",
-            "threshold": "BLOCK_NONE"
-        },
-        {
-            "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            "threshold": "BLOCK_NONE"
-        },
-        {
-            "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-            "threshold": "BLOCK_NONE"
-        }
-    ]
+    # 🔥 안전 설정 완전 비활성화 (모든 카테고리)
+    safety_settings = {
+        HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+    }
+    
+    # Gemini 2.0+ 추가 카테고리 (존재하는 경우)
+    try:
+        safety_settings[HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY] = HarmBlockThreshold.BLOCK_NONE
+    except AttributeError:
+        pass  # 이전 버전에서는 이 카테고리가 없음
     
     model_instance = genai.GenerativeModel(
         model_name=model,
@@ -243,9 +253,51 @@ def _chat_request_gemini(
     
     # 마지막 메시지로 응답 생성
     last_message = conversation_messages[-1]["parts"][0]["text"]
-    response = chat.send_message(last_message)
     
-    answer = response.text
+    max_retries = 3
+    for attempt in range(max_retries):
+        response = chat.send_message(last_message)
+        
+        # 응답이 차단되었는지 확인
+        if response.candidates:
+            candidate = response.candidates[0]
+            finish_reason = candidate.finish_reason
+            
+            # finish_reason 확인 (1=STOP, 2=MAX_TOKENS, 3=SAFETY, 4=RECITATION, 5=OTHER)
+            if finish_reason == 3:  # SAFETY
+                print(f"⚠️  Gemini SAFETY block detected (attempt {attempt+1}/{max_retries})")
+                if hasattr(candidate, 'safety_ratings'):
+                    for rating in candidate.safety_ratings:
+                        print(f"    - {rating.category}: {rating.probability}")
+                if attempt < max_retries - 1:
+                    import time
+                    time.sleep(1)
+                    continue
+            elif finish_reason == 2:  # MAX_TOKENS
+                print(f"⚠️  Gemini response truncated due to MAX_TOKENS")
+        
+        # 응답 텍스트 추출
+        try:
+            answer = response.text
+        except ValueError as e:
+            # 응답이 완전히 차단된 경우
+            print(f"⚠️  Gemini response blocked: {e}")
+            if attempt < max_retries - 1:
+                import time
+                time.sleep(1)
+                continue
+            else:
+                raise Exception(f"Gemini blocked response after {max_retries} attempts")
+        
+        # 응답이 비어있거나 너무 짧은 경우
+        if not answer or len(answer.strip()) < 50:
+            print(f"⚠️  Gemini response too short ({len(answer) if answer else 0} chars), retrying...")
+            if attempt < max_retries - 1:
+                import time
+                time.sleep(1)
+                continue
+        
+        break
     
     time = int(np.max([message.time for message in messages]) + 1)
     return Message(time=time, content=answer, role='assistant')
