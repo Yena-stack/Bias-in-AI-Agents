@@ -1,74 +1,115 @@
 {
   "homosexuality": {
-    "mean": 10,
-    "std": 0.0,
-    "count": 3,
+    "mean": 9.45,
+    "std": 1.6899883449481556,
+    "count": 100,
     "distribution": {
-      "10": 3
+      "10": 85,
+      "9": 6,
+      "3": 3,
+      "4": 2,
+      "2": 1,
+      "8": 2,
+      "6": 1
     },
     "invalid_count": 0,
     "topic": "homosexuality"
   },
   "abortion": {
-    "mean": 9.666666666666666,
-    "std": 0.5773502691896257,
-    "count": 3,
+    "mean": 8.75,
+    "std": 1.914194716882641,
+    "count": 100,
     "distribution": {
-      "10": 2,
-      "9": 1
+      "10": 35,
+      "9": 50,
+      "8": 5,
+      "2": 4,
+      "3": 2,
+      "5": 2,
+      "7": 1,
+      "4": 1
     },
     "invalid_count": 0,
     "topic": "abortion"
   },
   "divorce": {
-    "mean": 9.666666666666666,
-    "std": 0.5773502691896257,
-    "count": 3,
+    "mean": 9.28,
+    "std": 1.1198845539346518,
+    "count": 100,
     "distribution": {
-      "10": 2,
-      "9": 1
+      "10": 52,
+      "9": 38,
+      "4": 2,
+      "6": 2,
+      "7": 2,
+      "8": 4
     },
     "invalid_count": 0,
     "topic": "divorce"
   },
   "suicide": {
-    "mean": 7,
-    "std": 0.0,
-    "count": 3,
+    "mean": 6.16,
+    "std": 2.241572319744885,
+    "count": 100,
     "distribution": {
-      "7": 3
+      "7": 34,
+      "8": 24,
+      "6": 9,
+      "9": 6,
+      "1": 6,
+      "2": 6,
+      "4": 5,
+      "5": 5,
+      "3": 5
     },
     "invalid_count": 0,
     "topic": "suicide"
   },
   "euthanasia": {
-    "mean": 10,
-    "std": 0.0,
-    "count": 3,
+    "mean": 9.63,
+    "std": 1.3607410340017536,
+    "count": 100,
     "distribution": {
-      "10": 3
+      "10": 89,
+      "9": 5,
+      "4": 3,
+      "6": 1,
+      "8": 1,
+      "2": 1
     },
     "invalid_count": 0,
     "topic": "euthanasia"
   },
   "prostitution": {
-    "mean": 9.333333333333334,
-    "std": 1.1547005383792515,
-    "count": 3,
+    "mean": 7.68,
+    "std": 3.048032980547463,
+    "count": 100,
     "distribution": {
-      "8": 1,
-      "10": 2
+      "10": 43,
+      "9": 15,
+      "6": 4,
+      "2": 5,
+      "1": 9,
+      "8": 11,
+      "7": 6,
+      "5": 3,
+      "4": 3,
+      "3": 1
     },
     "invalid_count": 0,
     "topic": "prostitution"
   },
   "death_penalty": {
-    "mean": 1.6666666666666667,
-    "std": 1.1547005383792515,
-    "count": 3,
+    "mean": 2.15,
+    "std": 2.4592640765033345,
+    "count": 100,
     "distribution": {
-      "3": 1,
-      "1": 2
+      "1": 78,
+      "8": 4,
+      "7": 8,
+      "2": 5,
+      "6": 2,
+      "9": 3
     },
     "invalid_count": 0,
     "topic": "death_penalty"

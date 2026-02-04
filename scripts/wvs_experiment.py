@@ -464,7 +464,21 @@ if __name__ == '__main__':
             
             with open(responses_path, 'w', newline='', encoding='utf-8') as f:
                 if responses:
-                    writer = csv.DictWriter(f, fieldnames=responses[0].keys())
+                    # 모든 응답에서 발생하는 모든 필드 수집
+                    all_fieldnames = set()
+                    for resp in responses:
+                        all_fieldnames.update(resp.keys())
+                    
+                    # 필드 순서 정리 (기본 필드 먼저, 나머지는 정렬)
+                    base_fields = ["persona_id", "country", "age", "gender", "education_level", 
+                                   "social_class", "political_left_right", "importance_religion", 
+                                   "religiosity", "response", "temperature", "model"]
+                    rating_fields = sorted([f for f in all_fieldnames if f.startswith("rating_")])
+                    other_fields = sorted([f for f in all_fieldnames if f not in base_fields and f not in rating_fields])
+                    
+                    fieldnames = [f for f in base_fields if f in all_fieldnames] + rating_fields + other_fields
+                    
+                    writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
                     writer.writeheader()
                     writer.writerows(responses)
             
