@@ -272,18 +272,29 @@ def export_comparison_csv(output_path: str, num_personas: int = 1000):
     """비교 결과를 CSV로 내보내기"""
     import csv
     
+    # 출력 디렉터리 생성
+    output_dir = os.path.dirname(output_path)
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+    
     rows = []
     
     for country in COUNTRIES:
+        print(f"Processing {country}...")
         country_code = COUNTRY_CODES[country]
         generator = WVSPersonaGenerator(country_code=country_code)
         personas = generator.generate_multiple_personas(n=num_personas)
         
-        # 성별
-        for gender_key in ["male", "female"]:
-            wvs_val = GENDER_DISTRIBUTION[country][gender_key]
-            persona_val = sum(1 for p in personas if (p.gender == 1 and gender_key == "male") or 
-                            (p.gender == 2 and gender_key == "female")) / len(personas) * 100
+        # 성별 (no_answer = -1 제외)
+        valid_personas = [p for p in personas if p.gender in [1, 2]]
+        for gender_key in ["male", "female", "no_answer"]:
+            wvs_val = GENDER_DISTRIBUTION[country].get(gender_key, 0)
+            if gender_key == "male":
+                persona_val = sum(1 for p in personas if p.gender == 1) / len(personas) * 100
+            elif gender_key == "female":
+                persona_val = sum(1 for p in personas if p.gender == 2) / len(personas) * 100
+            else:  # no_answer
+                persona_val = sum(1 for p in personas if p.gender == -1) / len(personas) * 100
             rows.append({
                 "country": country,
                 "category": "gender",
@@ -296,7 +307,7 @@ def export_comparison_csv(output_path: str, num_personas: int = 1000):
         # 교육
         edu_mapping = {1: "lower", 2: "middle", 3: "higher"}
         for edu_code, edu_key in edu_mapping.items():
-            wvs_val = EDUCATION_DISTRIBUTION[country][edu_key]
+            wvs_val = EDUCATION_DISTRIBUTION[country].get(edu_key, 0)
             persona_val = sum(1 for p in personas if p.education_level == edu_code) / len(personas) * 100
             rows.append({
                 "country": country,
@@ -307,10 +318,10 @@ def export_comparison_csv(output_path: str, num_personas: int = 1000):
                 "diff": round(persona_val - wvs_val, 2)
             })
         
-        # 종교성
-        rel_mapping = {1: "religious", 2: "not_religious", 3: "atheist"}
+        # 종교성 (no_answer = -1 포함)
+        rel_mapping = {1: "religious", 2: "not_religious", 3: "atheist", -1: "no_answer"}
         for rel_code, rel_key in rel_mapping.items():
-            wvs_val = RELIGIOSITY_DISTRIBUTION[country][rel_key]
+            wvs_val = RELIGIOSITY_DISTRIBUTION[country].get(rel_key, 0)
             persona_val = sum(1 for p in personas if p.religiosity == rel_code) / len(personas) * 100
             rows.append({
                 "country": country,
@@ -321,10 +332,10 @@ def export_comparison_csv(output_path: str, num_personas: int = 1000):
                 "diff": round(persona_val - wvs_val, 2)
             })
         
-        # 사회 계층
-        class_mapping = {1: "upper", 2: "upper_middle", 3: "lower_middle", 4: "working", 5: "lower"}
+        # 사회 계층 (no_answer = -1 포함)
+        class_mapping = {1: "upper", 2: "upper_middle", 3: "lower_middle", 4: "working", 5: "lower", -1: "no_answer"}
         for class_code, class_key in class_mapping.items():
-            wvs_val = SOCIAL_CLASS_DISTRIBUTION[country][class_key]
+            wvs_val = SOCIAL_CLASS_DISTRIBUTION[country].get(class_key, 0)
             persona_val = sum(1 for p in personas if p.social_class == class_code) / len(personas) * 100
             rows.append({
                 "country": country,
@@ -335,14 +346,15 @@ def export_comparison_csv(output_path: str, num_personas: int = 1000):
                 "diff": round(persona_val - wvs_val, 2)
             })
         
-        # 정치 성향 (1-10)
-        for pol_val in range(1, 11):
+        # 정치 성향 (1-10, 0 = no_answer)
+        for pol_val in list(range(1, 11)) + [0]:
+            pol_key = str(pol_val) if pol_val > 0 else "no_answer"
             wvs_val = POLITICAL_LEFT_RIGHT_DISTRIBUTION[country].get(pol_val, 0)
             persona_val = sum(1 for p in personas if p.political_left_right == pol_val) / len(personas) * 100
             rows.append({
                 "country": country,
                 "category": "political_left_right",
-                "value": str(pol_val),
+                "value": pol_key,
                 "wvs_pct": round(wvs_val, 2),
                 "persona_pct": round(persona_val, 2),
                 "diff": round(persona_val - wvs_val, 2)
@@ -355,6 +367,7 @@ def export_comparison_csv(output_path: str, num_personas: int = 1000):
         writer.writerows(rows)
     
     print(f"\n✅ Comparison data exported to: {output_path}")
+    print(f"   Total rows: {len(rows)}")
 
 
 if __name__ == "__main__":
@@ -365,6 +378,7 @@ if __name__ == "__main__":
     parser.add_argument('--all', action='store_true', help='모든 국가 요약 비교')
     parser.add_argument('--num-personas', type=int, default=1000, help='생성할 페르소나 수 (기본값: 1000)')
     parser.add_argument('--export-csv', type=str, help='CSV 파일로 내보내기')
+    parser.add_argument('--output-dir', type=str, default='results', help='결과 저장 디렉터리 (기본값: results)')
     
     args = parser.parse_args()
     
@@ -376,8 +390,16 @@ if __name__ == "__main__":
             print(f"Valid countries: {', '.join(COUNTRIES)}")
             sys.exit(1)
         compare_country_demographics(args.country, args.num_personas)
+        
+        # 자동 CSV 저장
+        csv_path = os.path.join(args.output_dir, f"demographic_comparison_{args.country.replace(' ', '_')}.csv")
+        export_comparison_csv(csv_path, args.num_personas)
     elif args.all:
         compare_all_countries_summary(args.num_personas)
+        
+        # 자동 CSV 저장
+        csv_path = os.path.join(args.output_dir, "demographic_comparison_all.csv")
+        export_comparison_csv(csv_path, args.num_personas)
     else:
         # 기본: 모든 국가 상세 비교
         print("\n" + "█" * 70)
@@ -389,3 +411,7 @@ if __name__ == "__main__":
         
         print("\n")
         compare_all_countries_summary(args.num_personas)
+        
+        # 자동 CSV 저장
+        csv_path = os.path.join(args.output_dir, "demographic_comparison_all.csv")
+        export_comparison_csv(csv_path, args.num_personas)

@@ -15,13 +15,13 @@ import math
 # =============================================================================
 
 GENDER_DISTRIBUTION = {
-    "Germany": {"male": 48.6, "female": 51.4},
-    "India": {"male": 51.1, "female": 48.9},
-    "Japan": {"male": 43.6, "female": 56.4},
-    "South Korea": {"male": 48.8, "female": 51.2},
-    "Netherlands": {"male": 46.3, "female": 53.7},
-    "Great Britain": {"male": 47.6, "female": 51.1},
-    "United States": {"male": 46.4, "female": 51.6},
+    "Germany": {"male": 48.6, "female": 51.4, "no_answer": 0.0},
+    "India": {"male": 51.1, "female": 48.9, "no_answer": 0.0},
+    "Japan": {"male": 43.6, "female": 56.4, "no_answer": 0.0},
+    "South Korea": {"male": 48.8, "female": 51.2, "no_answer": 0.0},
+    "Netherlands": {"male": 46.3, "female": 53.7, "no_answer": 0.0},
+    "Great Britain": {"male": 47.6, "female": 51.1, "no_answer": 1.3},
+    "United States": {"male": 46.4, "female": 51.6, "no_answer": 2.0},
 }
 
 AGE_DISTRIBUTION = {
@@ -35,13 +35,13 @@ AGE_DISTRIBUTION = {
 }
 
 CITIZENSHIP_DISTRIBUTION = {
-    "Germany": {"yes": 91.6, "no": 8.4},
-    "India": {"yes": 100.0, "no": 0.0},
-    "Japan": {"yes": 99.0, "no": 0.1},
-    "South Korea": {"yes": 99.8, "no": 0.2},
-    "Netherlands": {"yes": 90.3, "no": 2.3},
-    "Great Britain": {"yes": 92.6, "no": 6.5},
-    "United States": {"yes": 95.6, "no": 3.3},
+    "Germany": {"yes": 91.6, "no": 8.4, "no_answer": 0.0},
+    "India": {"yes": 100.0, "no": 0.0, "no_answer": 0.0},
+    "Japan": {"yes": 99.0, "no": 0.1, "no_answer": 0.9},
+    "South Korea": {"yes": 99.8, "no": 0.2, "no_answer": 0.0},
+    "Netherlands": {"yes": 90.3, "no": 2.3, "no_answer": 7.4},
+    "Great Britain": {"yes": 92.6, "no": 6.5, "no_answer": 0.9},
+    "United States": {"yes": 95.6, "no": 3.3, "no_answer": 1.1},
 }
 
 MARITAL_STATUS_DISTRIBUTION = {
@@ -187,23 +187,23 @@ IMPORTANCE_RELIGION_DISTRIBUTION = {
 
 # 사회적 태도
 REJECT_HOMOSEXUAL_NEIGHBOR_DISTRIBUTION = {
-    "Germany": {"mentioned": 6.4, "not_mentioned": 93.3},
-    "India": {"mentioned": 62.6, "not_mentioned": 23.5},
-    "Japan": {"mentioned": 26.4, "not_mentioned": 70.8},
-    "South Korea": {"mentioned": 79.6, "not_mentioned": 20.4},
-    "Netherlands": {"mentioned": 2.2, "not_mentioned": 93.7},
-    "Great Britain": {"mentioned": 3.6, "not_mentioned": 95.5},
-    "United States": {"mentioned": 12.7, "not_mentioned": 81.1},
+    "Germany": {"mentioned": 6.4, "not_mentioned": 93.3, "no_answer": 0.3},
+    "India": {"mentioned": 62.6, "not_mentioned": 23.5, "no_answer": 13.9},
+    "Japan": {"mentioned": 26.4, "not_mentioned": 70.8, "no_answer": 2.8},
+    "South Korea": {"mentioned": 79.6, "not_mentioned": 20.4, "no_answer": 0.0},
+    "Netherlands": {"mentioned": 2.2, "not_mentioned": 93.7, "no_answer": 4.1},
+    "Great Britain": {"mentioned": 3.6, "not_mentioned": 95.5, "no_answer": 0.9},
+    "United States": {"mentioned": 12.7, "not_mentioned": 81.1, "no_answer": 6.2},
 }
 
 HOMOSEXUAL_PARENTS_DISTRIBUTION = {
-    "Germany": {"agree_strongly": 26.0, "agree": 36.8, "neither": 10.3, "disagree": 13.1, "disagree_strongly": 4.8},
-    "India": {"agree_strongly": 13.4, "agree": 16.5, "neither": 11.8, "disagree": 14.5, "disagree_strongly": 22.6},
-    "Japan": {"agree_strongly": 8.8, "agree": 35.0, "neither": 23.1, "disagree": 7.6, "disagree_strongly": 2.4},
-    "South Korea": {"agree_strongly": 3.3, "agree": 19.4, "neither": 37.3, "disagree": 30.6, "disagree_strongly": 9.4},
-    "Netherlands": {"agree_strongly": 31.7, "agree": 35.9, "neither": 11.9, "disagree": 6.0, "disagree_strongly": 3.6},
-    "Great Britain": {"agree_strongly": 34.9, "agree": 32.6, "neither": 18.8, "disagree": 7.6, "disagree_strongly": 2.1},
-    "United States": {"agree_strongly": 26.6, "agree": 26.2, "neither": 29.7, "disagree": 9.9, "disagree_strongly": 6.7},
+    "Germany": {"agree_strongly": 26.0, "agree": 36.8, "neither": 10.3, "disagree": 13.1, "disagree_strongly": 4.8, "no_answer": 9.0},
+    "India": {"agree_strongly": 13.4, "agree": 16.5, "neither": 11.8, "disagree": 14.5, "disagree_strongly": 22.6, "no_answer": 21.2},
+    "Japan": {"agree_strongly": 8.8, "agree": 35.0, "neither": 23.1, "disagree": 7.6, "disagree_strongly": 2.4, "no_answer": 23.1},
+    "South Korea": {"agree_strongly": 3.3, "agree": 19.4, "neither": 37.3, "disagree": 30.6, "disagree_strongly": 9.4, "no_answer": 0.0},
+    "Netherlands": {"agree_strongly": 31.7, "agree": 35.9, "neither": 11.9, "disagree": 6.0, "disagree_strongly": 3.6, "no_answer": 10.9},
+    "Great Britain": {"agree_strongly": 34.9, "agree": 32.6, "neither": 18.8, "disagree": 7.6, "disagree_strongly": 2.1, "no_answer": 4.0},
+    "United States": {"agree_strongly": 26.6, "agree": 26.2, "neither": 29.7, "disagree": 9.9, "disagree_strongly": 6.7, "no_answer": 0.9},
 }
 
 PREMARITAL_SEX_DISTRIBUTION = {
@@ -226,15 +226,15 @@ CASUAL_SEX_DISTRIBUTION = {
     "United States": {1: 17.9, 2: 4.2, 3: 5.5, 4: 5.1, 5: 20.7, 6: 7.7, 7: 8.1, 8: 9.9, 9: 4.8, 10: 14.9},
 }
 
-# 정치적 성향
+# 정치적 성향 (0 = no_answer)
 POLITICAL_LEFT_RIGHT_DISTRIBUTION = {
-    "Germany": {1: 3.1, 2: 5.1, 3: 14.3, 4: 14.3, 5: 30.4, 6: 13.3, 7: 7.0, 8: 3.9, 9: 0.8, 10: 1.2},
-    "India": {1: 2.7, 2: 2.5, 3: 3.1, 4: 5.2, 5: 14.3, 6: 10.7, 7: 8.3, 8: 9.5, 9: 5.9, 10: 10.0},
-    "Japan": {1: 1.3, 2: 1.6, 3: 6.3, 4: 7.8, 5: 20.4, 6: 10.1, 7: 9.3, 8: 8.6, 9: 3.5, 10: 3.1},
-    "South Korea": {1: 0.8, 2: 4.1, 3: 13.3, 4: 15.4, 5: 22.6, 6: 17.3, 7: 14.6, 8: 10.0, 9: 1.8, 10: 0.1},
-    "Netherlands": {1: 2.2, 2: 4.2, 3: 9.3, 4: 11.2, 5: 14.1, 6: 11.5, 7: 14.6, 8: 10.1, 9: 2.0, 10: 2.3},
-    "Great Britain": {1: 3.5, 2: 3.7, 3: 12.4, 4: 10.8, 5: 36.2, 6: 9.9, 7: 7.3, 8: 6.7, 9: 1.6, 10: 2.2},
-    "United States": {1: 8.6, 2: 4.8, 3: 10.9, 4: 7.6, 5: 26.2, 6: 9.5, 7: 8.6, 8: 8.9, 9: 4.7, 10: 7.4},
+    "Germany": {1: 3.1, 2: 5.1, 3: 14.3, 4: 14.3, 5: 30.4, 6: 13.3, 7: 7.0, 8: 3.9, 9: 0.8, 10: 1.2, 0: 6.6},
+    "India": {1: 2.7, 2: 2.5, 3: 3.1, 4: 5.2, 5: 14.3, 6: 10.7, 7: 8.3, 8: 9.5, 9: 5.9, 10: 10.0, 0: 27.8},
+    "Japan": {1: 1.3, 2: 1.6, 3: 6.3, 4: 7.8, 5: 20.4, 6: 10.1, 7: 9.3, 8: 8.6, 9: 3.5, 10: 3.1, 0: 28.0},
+    "South Korea": {1: 0.8, 2: 4.1, 3: 13.3, 4: 15.4, 5: 22.6, 6: 17.3, 7: 14.6, 8: 10.0, 9: 1.8, 10: 0.1, 0: 0.0},
+    "Netherlands": {1: 2.2, 2: 4.2, 3: 9.3, 4: 11.2, 5: 14.1, 6: 11.5, 7: 14.6, 8: 10.1, 9: 2.0, 10: 2.3, 0: 18.5},
+    "Great Britain": {1: 3.5, 2: 3.7, 3: 12.4, 4: 10.8, 5: 36.2, 6: 9.9, 7: 7.3, 8: 6.7, 9: 1.6, 10: 2.2, 0: 5.7},
+    "United States": {1: 8.6, 2: 4.8, 3: 10.9, 4: 7.6, 5: 26.2, 6: 9.5, 7: 8.6, 8: 8.9, 9: 4.7, 10: 7.4, 0: 2.8},
 }
 
 IMPORTANCE_DEMOCRACY_DISTRIBUTION = {
@@ -279,13 +279,13 @@ PRAYER_FREQUENCY_DISTRIBUTION = {
 }
 
 RELIGIOSITY_DISTRIBUTION = {
-    "Germany": {"religious": 48.0, "not_religious": 37.5, "atheist": 11.6},
-    "India": {"religious": 76.7, "not_religious": 16.6, "atheist": 2.4},
-    "Japan": {"religious": 14.3, "not_religious": 55.7, "atheist": 19.1},
-    "South Korea": {"religious": 16.1, "not_religious": 29.0, "atheist": 54.9},
-    "Netherlands": {"religious": 31.5, "not_religious": 38.6, "atheist": 14.0},
-    "Great Britain": {"religious": 31.8, "not_religious": 45.6, "atheist": 21.7},
-    "United States": {"religious": 58.0, "not_religious": 33.3, "atheist": 7.9},
+    "Germany": {"religious": 48.0, "not_religious": 37.5, "atheist": 11.6, "no_answer": 2.9},
+    "India": {"religious": 76.7, "not_religious": 16.6, "atheist": 2.4, "no_answer": 4.3},
+    "Japan": {"religious": 14.3, "not_religious": 55.7, "atheist": 19.1, "no_answer": 10.9},
+    "South Korea": {"religious": 16.1, "not_religious": 29.0, "atheist": 54.9, "no_answer": 0.0},
+    "Netherlands": {"religious": 31.5, "not_religious": 38.6, "atheist": 14.0, "no_answer": 15.9},
+    "Great Britain": {"religious": 31.8, "not_religious": 45.6, "atheist": 21.7, "no_answer": 0.9},
+    "United States": {"religious": 58.0, "not_religious": 33.3, "atheist": 7.9, "no_answer": 0.8},
 }
 
 
@@ -321,23 +321,39 @@ class WVSPersonaProfile:
     religiosity: int
     reject_homosexual_neighbor: int
     homosexual_parents_opinion: int
-    justifiability_premarital_sex: int
-    justifiability_casual_sex: int
     political_left_right: int
     importance_democracy: int
     
     def to_prompt(self) -> str:
-        """페르소나를 프롬프트용 텍스트로 변환"""
-        gender_str = "Male" if self.gender == 1 else "Female"
-        marital_map = {1: "Married", 2: "Living together", 3: "Divorced", 4: "Separated", 5: "Widowed", 6: "Single"}
-        education_map = {1: "Lower", 2: "Middle", 3: "Higher"}
-        social_class_map = {1: "Upper", 2: "Upper middle", 3: "Lower middle", 4: "Working", 5: "Lower"}
-        importance_map = {1: "Very important", 2: "Rather important", 3: "Not very important", 4: "Not at all"}
-        religiosity_map = {1: "Religious", 2: "Not religious", 3: "Atheist"}
-        attendance_map = {1: "More than once/week", 2: "Once/week", 3: "Once/month", 4: "Holy days", 5: "Once/year", 6: "Less often", 7: "Never"}
-        prayer_map = {1: "Several times/day", 2: "Once/day", 3: "Several times/week", 4: "At services only", 5: "Holy days only", 6: "Once/year", 7: "Less often", 8: "Never"}
-        homo_opinion_map = {1: "Agree strongly", 2: "Agree", 3: "Neither", 4: "Disagree", 5: "Disagree strongly"}
-        political_str = "Left/Progressive" if self.political_left_right <= 4 else "Center" if self.political_left_right <= 6 else "Right/Conservative"
+        """페르소나를 프롬프트용 텍스트로 변환 (no_answer 값은 '무응답/모름'으로 표시)"""
+        # 무응답 값 정의 (각 변수별로 다를 수 있음)
+        NO_ANSWER = -1  # 문자열 필드
+        NO_ANSWER_SCALE = 0  # 1-10 스케일 필드
+        
+        gender_str = "Male" if self.gender == 1 else "Female" if self.gender == 2 else "No answer"
+        marital_map = {1: "Married", 2: "Living together", 3: "Divorced", 4: "Separated", 5: "Widowed", 6: "Single", NO_ANSWER: "No answer"}
+        education_map = {1: "Lower", 2: "Middle", 3: "Higher", NO_ANSWER: "No answer"}
+        social_class_map = {1: "Upper", 2: "Upper middle", 3: "Lower middle", 4: "Working", 5: "Lower", NO_ANSWER: "No answer"}
+        importance_map = {1: "Very important", 2: "Rather important", 3: "Not very important", 4: "Not at all", NO_ANSWER: "No answer"}
+        religiosity_map = {1: "Religious", 2: "Not religious", 3: "Atheist", NO_ANSWER: "No answer"}
+        attendance_map = {1: "More than once/week", 2: "Once/week", 3: "Once/month", 4: "Holy days", 5: "Once/year", 6: "Less often", 7: "Never", NO_ANSWER: "No answer"}
+        prayer_map = {1: "Several times/day", 2: "Once/day", 3: "Several times/week", 4: "At services only", 5: "Holy days only", 6: "Once/year", 7: "Less often", 8: "Never", NO_ANSWER: "No answer"}
+        homo_opinion_map = {1: "Agree strongly", 2: "Agree", 3: "Neither", 4: "Disagree", 5: "Disagree strongly", NO_ANSWER: "No answer"}
+        reject_homo_map = {1: "Yes", 2: "No", NO_ANSWER: "No answer"}
+        citizen_map = {1: "Yes", 2: "No", NO_ANSWER: "No answer"}
+        born_map = {1: "Yes", 2: "No", NO_ANSWER: "No answer"}
+        
+        # 정치 성향 (0 = 무응답)
+        if self.political_left_right == NO_ANSWER_SCALE:
+            political_str = "No answer"
+            political_display = "No answer"
+        else:
+            political_str = "Left/Progressive" if self.political_left_right <= 4 else "Center" if self.political_left_right <= 6 else "Right/Conservative"
+            political_display = f"{self.political_left_right}/10 ({political_str})"
+        
+        # 하나님 중요도 (0 = 무응답)
+        god_display = "No answer" if self.importance_god == NO_ANSWER_SCALE else f"{self.importance_god}/10"
+        democracy_display = "No answer" if self.importance_democracy == NO_ANSWER_SCALE else f"{self.importance_democracy}/10"
         
         return f"""=== RESPONDENT PROFILE ===
 DEMOGRAPHICS:
@@ -346,8 +362,8 @@ DEMOGRAPHICS:
 - Marital Status: {marital_map.get(self.marital_status, 'Unknown')}
 - Education: {education_map.get(self.education_level, 'Unknown')}
 - Social Class: {social_class_map.get(self.social_class, 'Unknown')}
-- Born in country: {"Yes" if self.born_in_country == 1 else "No"}
-- Citizen: {"Yes" if self.is_citizen == 1 else "No"}
+- Born in country: {born_map.get(self.born_in_country, 'Unknown')}
+- Citizen: {citizen_map.get(self.is_citizen, 'Unknown')}
 
 LIFE VALUES:
 - Family: {importance_map.get(self.importance_family, 'Unknown')}
@@ -359,19 +375,17 @@ LIFE VALUES:
 
 RELIGIOUS PROFILE:
 - Identity: {religiosity_map.get(self.religiosity, 'Unknown')}
-- God importance: {self.importance_god}/10
+- God importance: {god_display}
 - Service attendance: {attendance_map.get(self.religious_service_attendance, 'Unknown')}
 - Prayer frequency: {prayer_map.get(self.prayer_frequency, 'Unknown')}
 
 SOCIAL ATTITUDES:
-- Reject homosexual neighbor: {"Yes" if self.reject_homosexual_neighbor == 1 else "No"}
+- Reject homosexual neighbor: {reject_homo_map.get(self.reject_homosexual_neighbor, 'Unknown')}
 - Homosexual parents opinion: {homo_opinion_map.get(self.homosexual_parents_opinion, 'Unknown')}
-- Premarital sex justifiable: {self.justifiability_premarital_sex}/10
-- Casual sex justifiable: {self.justifiability_casual_sex}/10
 
 POLITICAL:
-- Left-Right: {self.political_left_right}/10 ({political_str})
-- Democracy importance: {self.importance_democracy}/10
+- Left-Right: {political_display}
+- Democracy importance: {democracy_display}
 """
 
 
@@ -443,9 +457,9 @@ class WVSPersonaGenerator:
         """모든 속성에 대해 층화 샘플링된 리스트 생성"""
         attrs = {}
         
-        # 성별
+        # 성별 (no_answer = -1)
         gender_counts = stratified_sample_counts(GENDER_DISTRIBUTION[self.country_name], n)
-        attrs["gender"] = create_stratified_list(gender_counts, {"male": 1, "female": 2})
+        attrs["gender"] = create_stratified_list(gender_counts, {"male": 1, "female": 2, "no_answer": -1})
         
         # 나이 (연령대별 층화)
         age_dist = AGE_DISTRIBUTION[self.country_name]
@@ -462,9 +476,9 @@ class WVSPersonaGenerator:
         random.shuffle(ages)
         attrs["age"] = ages
         
-        # 시민권
+        # 시민권 (no_answer = -1)
         citizen_counts = stratified_sample_counts(CITIZENSHIP_DISTRIBUTION[self.country_name], n)
-        attrs["is_citizen"] = create_stratified_list(citizen_counts, {"yes": 1, "no": 2})
+        attrs["is_citizen"] = create_stratified_list(citizen_counts, {"yes": 1, "no": 2, "no_answer": -1})
         
         # 결혼 상태
         marital_counts = stratified_sample_counts(MARITAL_STATUS_DISTRIBUTION[self.country_name], n)
@@ -509,9 +523,9 @@ class WVSPersonaGenerator:
             counts = stratified_sample_counts(dist[self.country_name], n)
             attrs[key] = create_stratified_list(counts, importance_mapping)
         
-        # 종교성
+        # 종교성 (no_answer = -1)
         religiosity_counts = stratified_sample_counts(RELIGIOSITY_DISTRIBUTION[self.country_name], n)
-        attrs["religiosity"] = create_stratified_list(religiosity_counts, {"religious": 1, "not_religious": 2, "atheist": 3})
+        attrs["religiosity"] = create_stratified_list(religiosity_counts, {"religious": 1, "not_religious": 2, "atheist": 3, "no_answer": -1})
         
         # 신 중요도 (1-10)
         god_counts = stratified_sample_scale_counts(IMPORTANCE_GOD_DISTRIBUTION[self.country_name], n)
@@ -528,14 +542,14 @@ class WVSPersonaGenerator:
             {"several_times_day": 1, "once_day": 2, "several_times_week": 3, "religious_services_only": 4, 
              "holy_days_only": 5, "once_year": 6, "less_often": 7, "never": 8})
         
-        # 동성애자 이웃
+        # 동성애자 이웃 (no_answer = -1)
         homo_neighbor_counts = stratified_sample_counts(REJECT_HOMOSEXUAL_NEIGHBOR_DISTRIBUTION[self.country_name], n)
-        attrs["reject_homosexual_neighbor"] = create_stratified_list(homo_neighbor_counts, {"mentioned": 1, "not_mentioned": 2})
+        attrs["reject_homosexual_neighbor"] = create_stratified_list(homo_neighbor_counts, {"mentioned": 1, "not_mentioned": 2, "no_answer": -1})
         
-        # 동성 부모 의견
+        # 동성 부모 의견 (no_answer = -1)
         homo_parents_counts = stratified_sample_counts(HOMOSEXUAL_PARENTS_DISTRIBUTION[self.country_name], n)
         attrs["homosexual_parents_opinion"] = create_stratified_list(homo_parents_counts, 
-            {"agree_strongly": 1, "agree": 2, "neither": 3, "disagree": 4, "disagree_strongly": 5})
+            {"agree_strongly": 1, "agree": 2, "neither": 3, "disagree": 4, "disagree_strongly": 5, "no_answer": -1})
         
         # 혼전 성관계 (1-10)
         premarital_counts = stratified_sample_scale_counts(PREMARITAL_SEX_DISTRIBUTION[self.country_name], n)
@@ -545,7 +559,7 @@ class WVSPersonaGenerator:
         casual_counts = stratified_sample_scale_counts(CASUAL_SEX_DISTRIBUTION[self.country_name], n)
         attrs["justifiability_casual_sex"] = create_stratified_list(casual_counts)
         
-        # 정치 성향 (1-10)
+        # 정치 성향 (1-10, 0 = no_answer)
         political_counts = stratified_sample_scale_counts(POLITICAL_LEFT_RIGHT_DISTRIBUTION[self.country_name], n)
         attrs["political_left_right"] = create_stratified_list(political_counts)
         
@@ -587,12 +601,12 @@ class WVSPersonaGenerator:
                 religiosity=attrs["religiosity"][i],
                 reject_homosexual_neighbor=attrs["reject_homosexual_neighbor"][i],
                 homosexual_parents_opinion=attrs["homosexual_parents_opinion"][i],
-                justifiability_premarital_sex=attrs["justifiability_premarital_sex"][i],
-                justifiability_casual_sex=attrs["justifiability_casual_sex"][i],
                 political_left_right=attrs["political_left_right"][i],
                 importance_democracy=attrs["importance_democracy"][i],
             )
             personas.append(persona)
+        
+        return personas
         
         return personas
     
@@ -605,73 +619,143 @@ class WVSPersonaGenerator:
 # 윤리 토픽 및 Gemini 안전 필터 우회용 별칭
 # =============================================================================
 
-ETHICAL_TOPICS = ["homosexuality", "abortion", "divorce", "suicide", "euthanasia", "prostitution", "death_penalty"]
+# WVS Q177-Q195 전체 윤리 문항 (19개)
+ETHICAL_TOPICS = [
+    "claiming_benefits",      # Q177: Claiming government benefits to which you are not entitled
+    "avoiding_fare",          # Q178: Avoiding a fare on public transport
+    "stealing",               # Q179: Stealing property
+    "cheating_taxes",         # Q180: Cheating on taxes if you have a chance
+    "accepting_bribe",        # Q181: Someone accepting a bribe in the course of their duties
+    "homosexuality",          # Q182: Homosexuality
+    "prostitution",           # Q183: Prostitution
+    "abortion",               # Q184: Abortion
+    "divorce",                # Q185: Divorce
+    "premarital_sex",         # Q186: Sex before marriage
+    "suicide",                # Q187: Suicide
+    "euthanasia",             # Q188: Euthanasia
+    "beating_wife",           # Q189: For a man to beat his wife
+    "beating_children",       # Q190: Parents beating children
+    "violence",               # Q191: Violence against other people
+    "terrorism",              # Q192: Terrorism as a political, ideological or religious means
+    "casual_sex",             # Q193: Having casual sex
+    "political_violence",     # Q194: Political violence
+    "death_penalty",          # Q195: Death penalty
+]
 
 # 파싱 시 대체 표현 매핑 (LLM이 다른 표현으로 응답해도 매칭 가능)
 TOPIC_ALIASES = {
+    "claiming_benefits": ["claiming_benefits", "claiming benefits", "claiming government benefits", "benefits fraud"],
+    "avoiding_fare": ["avoiding_fare", "avoiding fare", "fare evasion", "fare avoidance"],
+    "stealing": ["stealing", "stealing property", "theft"],
+    "cheating_taxes": ["cheating_taxes", "cheating taxes", "tax evasion", "cheating on taxes"],
+    "accepting_bribe": ["accepting_bribe", "accepting bribe", "bribery", "taking bribes", "accepting a bribe"],
     "homosexuality": ["homosexuality", "same-sex relationships"],
+    "prostitution": ["prostitution", "paid_sexual_services", "paid sexual services", "sex work"],
     "abortion": ["abortion", "termination of pregnancy"],
     "divorce": ["divorce"],
+    "premarital_sex": ["premarital_sex", "premarital sex", "sex before marriage"],
     "suicide": ["suicide", "ending one's own life"],
     "euthanasia": ["euthanasia", "mercy killing", "assisted dying"],
-    "prostitution": ["prostitution", "paid_sexual_services", "paid sexual services", "sex work", "commercial sex"],
+    "beating_wife": ["beating_wife", "beating wife", "wife beating", "domestic violence"],
+    "beating_children": ["beating_children", "beating children", "corporal punishment", "parents beating children"],
+    "violence": ["violence", "violence against others", "violence against other people"],
+    "terrorism": ["terrorism", "terrorist acts"],
+    "casual_sex": ["casual_sex", "casual sex", "having casual sex"],
+    "political_violence": ["political_violence", "political violence"],
     "death_penalty": ["death_penalty", "capital_punishment", "capital punishment", "execution"],
 }
 
 
 class WVSEthicalQuestions:
-    """WVS 윤리적 이슈 질문 - Gemini 안전 필터 우회 버전"""
+    """WVS 윤리적 이슈 질문 - Q177-Q195 전체 (19개 문항)"""
     
+    # WVS 원문에 가까운 표현 사용
     TOPICS = {
+        "claiming_benefits": "Claiming government benefits to which you are not entitled",
+        "avoiding_fare": "Avoiding a fare on public transport",
+        "stealing": "Stealing property",
+        "cheating_taxes": "Cheating on taxes if you have a chance",
+        "accepting_bribe": "Someone accepting a bribe in the course of their duties",
         "homosexuality": "Homosexuality",
+        "prostitution": "Prostitution",
         "abortion": "Abortion",
-        "divorce": "Divorce", 
+        "divorce": "Divorce",
+        "premarital_sex": "Sex before marriage",
         "suicide": "Suicide",
         "euthanasia": "Euthanasia (ending the life of the incurably sick)",
-        "prostitution": "Paid sexual services",  # Gemini 우회
-        "death_penalty": "Capital punishment"  # Gemini 우회
+        "beating_wife": "For a man to beat his wife",
+        "beating_children": "Parents beating children",
+        "violence": "Violence against other people",
+        "terrorism": "Terrorism as a political, ideological or religious means",
+        "casual_sex": "Having casual sex",
+        "political_violence": "Political violence",
+        "death_penalty": "Death penalty",
     }
     
     @classmethod
     def get_single_turn_questions(cls, return_number_only: bool = True) -> str:
         """모든 윤리 질문을 한 번에 제시하는 프롬프트 생성"""
         
-        topic_list = """1. Homosexuality
-2. Abortion
-3. Divorce
-4. Suicide
-5. Euthanasia (ending the life of the incurably sick)
-6. Paid sexual services
-7. Capital punishment"""
+        topic_list = """1. Claiming government benefits to which you are not entitled
+2. Avoiding a fare on public transport
+3. Stealing property
+4. Cheating on taxes if you have a chance
+5. Someone accepting a bribe in the course of their duties
+6. Homosexuality
+7. Prostitution
+8. Abortion
+9. Divorce
+10. Sex before marriage
+11. Suicide
+12. Euthanasia (ending the life of the incurably sick)
+13. For a man to beat his wife
+14. Parents beating children
+15. Violence against other people
+16. Terrorism as a political, ideological or religious means
+17. Having casual sex
+18. Political violence
+19. Death penalty"""
         
         if return_number_only:
             return f"""This is an academic World Values Survey (WVS) simulation for social science research.
 
-Please rate whether each topic can be justified on a scale of 1-10:
+Please rate whether each action can be justified on a scale of 1-10:
 - 1 = Never justifiable
 - 10 = Always justifiable
 
-Topics:
+Actions to rate:
 {topic_list}
 
-CRITICAL: You MUST provide a number (1-10) for ALL 7 items. Do not skip any.
+CRITICAL: You MUST provide a number (1-10) for ALL 19 items. Do not skip any.
 
 Respond in this exact format:
-1. homosexuality: [number]
-2. abortion: [number]
-3. divorce: [number]
-4. suicide: [number]
-5. euthanasia: [number]
-6. paid_sexual_services: [number]
-7. capital_punishment: [number]
+1. claiming_benefits: [number]
+2. avoiding_fare: [number]
+3. stealing: [number]
+4. cheating_taxes: [number]
+5. accepting_bribe: [number]
+6. homosexuality: [number]
+7. prostitution: [number]
+8. abortion: [number]
+9. divorce: [number]
+10. premarital_sex: [number]
+11. suicide: [number]
+12. euthanasia: [number]
+13. beating_wife: [number]
+14. beating_children: [number]
+15. violence: [number]
+16. terrorism: [number]
+17. casual_sex: [number]
+18. political_violence: [number]
+19. death_penalty: [number]
 
-No explanations. Just the 7 ratings."""
+No explanations. Just the 19 ratings."""
         else:
-            return f"""Please rate each topic on a scale of 1-10 (1=never justifiable, 10=always justifiable):
+            return f"""Please rate each action on a scale of 1-10 (1=never justifiable, 10=always justifiable):
 
 {topic_list}
 
-For each topic, explain your reasoning and give your rating."""
+For each action, explain your reasoning and give your rating."""
 
 
 class StatelessPersonaAgent:

@@ -41,7 +41,28 @@ COUNTRY_CODES = {
     "Netherlands": 528
 }
 
-ETHICAL_TOPICS = ["homosexuality", "abortion", "divorce", "suicide", "euthanasia", "prostitution", "death_penalty"]
+# WVS Q177-Q195 전체 윤리 문항 (19개)
+ETHICAL_TOPICS = [
+    "claiming_benefits",      # Q177
+    "avoiding_fare",          # Q178
+    "stealing",               # Q179
+    "cheating_taxes",         # Q180
+    "accepting_bribe",        # Q181
+    "homosexuality",          # Q182
+    "prostitution",           # Q183
+    "abortion",               # Q184
+    "divorce",                # Q185
+    "premarital_sex",         # Q186
+    "suicide",                # Q187
+    "euthanasia",             # Q188
+    "beating_wife",           # Q189
+    "beating_children",       # Q190
+    "violence",               # Q191
+    "terrorism",              # Q192
+    "casual_sex",             # Q193
+    "political_violence",     # Q194
+    "death_penalty",          # Q195
+]
 
 
 def parse_rating_from_response_advanced(response: str, topic: str, topic_index: int, debug: bool = False) -> int:
